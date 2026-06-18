@@ -7,25 +7,40 @@ struct HomeView: View {
     let onStart: () -> Void
     let onContinue: () -> Void
 
-    @State private var appear = false
+    @State private var heroAppeared = false
+    @State private var titleAppeared = false
+    @State private var taglineAppeared = false
+    @State private var buttonsAppeared = false
+    @State private var floatOffset: CGFloat = 0
+    @State private var buttonGlow = false
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 16) {
-                Text(L10n.appName)
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppTheme.textPrimary)
+            VStack(spacing: 28) {
+                SudokuLogoView(size: 118, showRing: true, animateCells: true, animateRing: true)
+                    .offset(y: floatOffset)
+                    .opacity(heroAppeared ? 1 : 0)
+                    .scaleEffect(heroAppeared ? 1 : 0.82)
 
-                Text(L10n.homeTagline)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+                VStack(spacing: 14) {
+                    Text(L10n.appName)
+                        .font(.system(size: 52, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.accentGradient)
+                        .shadow(color: AppTheme.accent.opacity(0.35), radius: 18, y: 6)
+
+                    Text(L10n.homeTagline)
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .opacity(taglineAppeared ? 1 : 0)
+                        .offset(y: taglineAppeared ? 0 : 14)
+                }
+                .opacity(titleAppeared ? 1 : 0)
+                .offset(y: titleAppeared ? 0 : 22)
             }
-            .opacity(appear ? 1 : 0)
-            .offset(y: appear ? 0 : 20)
 
             Spacer()
 
@@ -42,23 +57,57 @@ struct HomeView: View {
                         }
                     }
                     .buttonStyle(PremiumButtonStyle())
+                    .opacity(buttonsAppeared ? 1 : 0)
+                    .offset(y: buttonsAppeared ? 0 : 24)
                 }
 
                 Button(action: onStart) {
                     Text(hasSavedGame ? L10n.newGame : L10n.start)
                 }
                 .buttonStyle(PremiumButtonStyle(isSecondary: hasSavedGame))
+                .overlay {
+                    if !hasSavedGame {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(AppTheme.accent.opacity(buttonGlow ? 0.45 : 0.15), lineWidth: 1.5)
+                            .scaleEffect(buttonGlow ? 1.04 : 1)
+                            .blur(radius: 1)
+                    }
+                }
+                .opacity(buttonsAppeared ? 1 : 0)
+                .offset(y: buttonsAppeared ? 0 : 28)
             }
             .padding(.horizontal, 28)
             .padding(.bottom, 48)
-            .opacity(appear ? 1 : 0)
-            .offset(y: appear ? 0 : 30)
         }
-        .premiumBackground()
+        .premiumBackground(animated: true)
         .onAppear {
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
-                appear = true
-            }
+            runEntranceAnimations()
+        }
+    }
+
+    private func runEntranceAnimations() {
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.74).delay(0.05)) {
+            heroAppeared = true
+        }
+
+        withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true).delay(0.7)) {
+            floatOffset = -7
+        }
+
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.28)) {
+            titleAppeared = true
+        }
+
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.82).delay(0.42)) {
+            taglineAppeared = true
+        }
+
+        withAnimation(.spring(response: 0.75, dampingFraction: 0.78).delay(0.58)) {
+            buttonsAppeared = true
+        }
+
+        withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true).delay(0.9)) {
+            buttonGlow = true
         }
     }
 }

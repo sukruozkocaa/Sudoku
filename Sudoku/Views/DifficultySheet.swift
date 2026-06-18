@@ -69,11 +69,14 @@ struct DifficultySheet: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
-        .frame(maxWidth: .infinity)
-        .background(AppTheme.backgroundBottom)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .presentationDetents([.medium])
         .presentationDragIndicator(.hidden)
         .presentationCornerRadius(28)
+        .presentationBackground {
+            AppTheme.backgroundBottom
+                .ignoresSafeArea()
+        }
     }
 }
 
