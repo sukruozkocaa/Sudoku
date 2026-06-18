@@ -71,4 +71,24 @@ enum L10n {
     static func levelCompleted(_ level: Int) -> String {
         String(format: String(localized: "level_completed_format"), level)
     }
+
+    static var howToPlayTitle: String { String(localized: "how_to_play_title") }
+    static var howToPlaySkip: String { String(localized: "how_to_play_skip") }
+    static var howToPlayNext: String { String(localized: "how_to_play_next") }
+    static var howToPlayBack: String { String(localized: "how_to_play_back") }
+    static var howToPlayFinish: String { String(localized: "how_to_play_finish") }
+    static var howToPlayStep1Title: String { String(localized: "how_to_play_step1_title") }
+    static var howToPlayStep1Body: String { String(localized: "how_to_play_step1_body") }
+    static var howToPlayStep2Title: String { String(localized: "how_to_play_step2_title") }
+    static var howToPlayStep2Body: String { String(localized: "how_to_play_step2_body") }
+    static var howToPlayStep3Title: String { String(localized: "how_to_play_step3_title") }
+    static var howToPlayStep3Body: String { String(localized: "how_to_play_step3_body") }
+    static var howToPlayStep4Title: String { String(localized: "how_to_play_step4_title") }
+    static var howToPlayStep4Body: String { String(localized: "how_to_play_step4_body") }
+    static var howToPlayStep5Title: String { String(localized: "how_to_play_step5_title") }
+    static var howToPlayStep5Body: String { String(localized: "how_to_play_step5_body") }
+
+    static func howToPlayStepProgress(current: Int, total: Int) -> String {
+        String(format: String(localized: "how_to_play_step_progress"), current, total)
+    }
 }

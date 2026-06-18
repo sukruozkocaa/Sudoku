@@ -17,6 +17,9 @@ struct ContentView: View {
                     },
                     onContinue: {
                         coordinator.continueGame()
+                    },
+                    onShowHowToPlay: {
+                        coordinator.openHowToPlay()
                     }
                 )
                 .navigationDestination(for: AppDestination.self) { destination in
@@ -56,8 +59,22 @@ struct ContentView: View {
                     .transition(.opacity)
                     .zIndex(3)
             }
+
+            if coordinator.showHowToPlay && coordinator.navigationPath.isEmpty {
+                HowToPlayView(
+                    onFinish: {
+                        coordinator.closeHowToPlay(markSeen: true)
+                    },
+                    onSkip: {
+                        coordinator.closeHowToPlay(markSeen: true)
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(4)
+            }
         }
         .animation(.easeInOut(duration: 0.5), value: coordinator.showSplash)
+        .animation(.easeInOut(duration: 0.3), value: coordinator.showHowToPlay)
         .sheet(isPresented: $coordinator.showDifficultySheet) {
             DifficultySheet { difficulty in
                 coordinator.startGame(difficulty: difficulty)

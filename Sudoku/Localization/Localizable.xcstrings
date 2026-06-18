@@ -405,6 +405,262 @@
         }
       }
     },
+    "how_to_play_back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri"
+          }
+        }
+      }
+    },
+    "how_to_play_finish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's Play"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hadi Oynayalım"
+          }
+        }
+      }
+    },
+    "how_to_play_next" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İleri"
+          }
+        }
+      }
+    },
+    "how_to_play_skip" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atla"
+          }
+        }
+      }
+    },
+    "how_to_play_step1_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill the 6×6 grid with numbers 1–6. Every row, column, and 3×2 block must contain each number exactly once."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6×6 ızgarayı 1–6 arası sayılarla doldur. Her satır, sütun ve 3×2 kutuda her sayı yalnızca bir kez bulunmalı."
+          }
+        }
+      }
+    },
+    "how_to_play_step1_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome to Sudoku"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sudoku'ya Hoş Geldin"
+          }
+        }
+      }
+    },
+    "how_to_play_step2_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap an empty cell, then pick a number from the pad below. Use Delete to clear a cell or Undo to reverse your last move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boş bir hücreye dokun, ardından alttaki tuş takımından bir sayı seç. Sil ile hücreyi temizle, Geri Al ile son hamleni geri al."
+          }
+        }
+      }
+    },
+    "how_to_play_step2_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select & Fill"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seç ve Doldur"
+          }
+        }
+      }
+    },
+    "how_to_play_step3_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No number can repeat in the same row, column, or 3×2 block. Keep all three areas in mind while you play."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aynı satır, sütun veya 3×2 kutuda hiçbir sayı tekrar edemez. Oynarken bu üç bölgeyi birlikte düşün."
+          }
+        }
+      }
+    },
+    "how_to_play_step3_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three Simple Rules"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üç Basit Kural"
+          }
+        }
+      }
+    },
+    "how_to_play_step4_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a row, column, or block is filled correctly, it flashes green briefly. Those numbers turn gray and lock in place."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir satır, sütun veya kutu doğru tamamlandığında kısa süre yeşil yanıp söner. O sayılar griye döner ve kilitlenir."
+          }
+        }
+      }
+    },
+    "how_to_play_step4_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complete Regions"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölgeleri Tamamla"
+          }
+        }
+      }
+    },
+    "how_to_play_step5_body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish the puzzle to advance to the next level. Pick Easy, Medium, or Hard — Easy mode includes helpful hints."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulmacayı bitirince sonraki seviyeye geçersin. Kolay, Orta veya Zor seç — Kolay modda ipucu da var."
+          }
+        }
+      }
+    },
+    "how_to_play_step5_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Level Up"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seviye Atlama"
+          }
+        }
+      }
+    },
+    "how_to_play_step_progress" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %lld of %lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adım %lld / %lld"
+          }
+        }
+      }
+    },
+    "how_to_play_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to Play"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nasıl Oynanır"
+          }
+        }
+      }
+    },
     "level_completed_format" : {
       "localizations" : {
         "en" : {

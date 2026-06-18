@@ -15,6 +15,7 @@ final class AppCoordinatorViewModel {
     var gameSessionID = UUID()
     var showDifficultySheet = false
     var showSuccessOverlay = false
+    var showHowToPlay = false
 
     private let persistence: PersistenceServiceProtocol
     private(set) var savedProgress: GameProgress?
@@ -41,6 +42,20 @@ final class AppCoordinatorViewModel {
 
     func finishSplash() {
         showSplash = false
+        if !persistence.hasSeenHowToPlay {
+            showHowToPlay = true
+        }
+    }
+
+    func openHowToPlay() {
+        showHowToPlay = true
+    }
+
+    func closeHowToPlay(markSeen: Bool) {
+        showHowToPlay = false
+        if markSeen {
+            persistence.markHowToPlaySeen()
+        }
     }
 
     func requestNewGame() {
