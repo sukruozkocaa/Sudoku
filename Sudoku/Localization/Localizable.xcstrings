@@ -213,6 +213,166 @@
         }
       }
     },
+    "hint_apply" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apply"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygula"
+          }
+        }
+      }
+    },
+    "hint_cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
+          }
+        }
+      }
+    },
+    "hint_explanation_box_only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In this 3×2 block, only %lld is missing. That number must go in the highlighted cell."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu 3×2 kutuda yalnızca %lld eksik. Bu sayı işaretli hücreye gelmeli."
+          }
+        }
+      }
+    },
+    "hint_explanation_column_only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Column %lld is missing only %lld. The highlighted cell belongs to this column."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. sütunda yalnızca %lld eksik. İşaretli hücre bu sütunda."
+          }
+        }
+      }
+    },
+    "hint_explanation_elimination" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Row uses %@, column uses %@, and the block uses %@. After eliminating these, only %lld fits here."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satırda %@, sütunda %@, kutuda %@ var. Bunları elediğimizde buraya yalnızca %lld gelebilir."
+          }
+        }
+      }
+    },
+    "hint_explanation_fallback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on the row, column, and block rules, %lld is the only valid number for this cell."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satır, sütun ve kutu kurallarına göre bu hücreye yalnızca %lld yazılabilir."
+          }
+        }
+      }
+    },
+    "hint_explanation_row_only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Row %lld is missing only %lld. The highlighted cell belongs to this row."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. satırda yalnızca %lld eksik. İşaretli hücre bu satırda."
+          }
+        }
+      }
+    },
+    "hint_no_numbers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "none yet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "henüz yok"
+          }
+        }
+      }
+    },
+    "hint_popup_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hint"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İpucu"
+          }
+        }
+      }
+    },
+    "hint_suggested_number" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggested number"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önerilen sayı"
+          }
+        }
+      }
+    },
     "home" : {
       "localizations" : {
         "en" : {

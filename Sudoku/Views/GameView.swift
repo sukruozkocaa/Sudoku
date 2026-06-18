@@ -60,6 +60,23 @@ struct GameView: View {
             viewModel.onPuzzleUpdated = onPuzzleUpdated
             viewModel.onPuzzleCompleted = onPuzzleCompleted
         }
+        .overlay {
+            if let hint = viewModel.activeHint {
+                HintPopupView(
+                    puzzle: viewModel.puzzle,
+                    suggestion: hint,
+                    onApply: {
+                        viewModel.confirmHint()
+                    },
+                    onCancel: {
+                        viewModel.cancelHint()
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(10)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.activeHint != nil)
     }
 
     private var header: some View {
@@ -99,7 +116,7 @@ struct GameView: View {
     private var hintBar: some View {
         HStack(spacing: 12) {
             Button {
-                viewModel.useHint()
+                viewModel.requestHint()
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "lightbulb.fill")

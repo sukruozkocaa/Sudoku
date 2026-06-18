@@ -9,6 +9,7 @@ final class GameViewModel {
     var selectedColumn: Int?
     var conflictingCells: Set<String> = []
     var pendingCompletionFlashes: [CompletedRegion] = []
+    var activeHint: HintSuggestion?
     var hintMessage: String?
 
     var onPuzzleUpdated: ((SudokuPuzzle) -> Void)?
@@ -78,7 +79,7 @@ final class GameViewModel {
         onPuzzleUpdated?(puzzle)
     }
 
-    func useHint() {
+    func requestHint() {
         guard showsHint else { return }
 
         let target = hintTargetCell()
@@ -90,12 +91,37 @@ final class GameViewModel {
         let correctValue = puzzle.solution[row][column]
         guard puzzle.userGrid[row][column] != correctValue else { return }
 
+        selectedRow = row
+        selectedColumn = column
+        hintMessage = nil
+        activeHint = HintExplanationService.build(puzzle: puzzle, row: row, column: column)
+    }
+
+    func confirmHint() {
+        guard let hint = activeHint else { return }
+
+        let row = hint.row
+        let column = hint.column
+        let correctValue = hint.value
+        guard puzzle.userGrid[row][column] != correctValue else {
+            activeHint = nil
+            return
+        }
+
         moveHistory.append((row, column, puzzle.userGrid[row][column]))
         selectedRow = row
         selectedColumn = column
         puzzle.userGrid[row][column] = correctValue
-        hintMessage = nil
+        activeHint = nil
         applyMoveEffects(row: row, column: column)
+    }
+
+    func cancelHint() {
+        activeHint = nil
+    }
+
+    func useHint() {
+        requestHint()
     }
 
     func isSelected(row: Int, column: Int) -> Bool {

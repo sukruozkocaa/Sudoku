@@ -22,6 +22,17 @@ final class AppCoordinatorViewModel {
     init(persistence: PersistenceServiceProtocol = PersistenceService()) {
         self.persistence = persistence
         self.savedProgress = persistence.loadProgress()
+        normalizeSavedProgressIfNeeded()
+    }
+
+    var resumeLevel: Int? {
+        guard let progress = savedProgress, progress.hasActiveGame else { return nil }
+        return progress.puzzle.level
+    }
+
+    var resumeDifficulty: Difficulty? {
+        guard let progress = savedProgress, progress.hasActiveGame else { return nil }
+        return progress.puzzle.difficulty
     }
 
     var hasSavedGame: Bool {
@@ -46,6 +57,7 @@ final class AppCoordinatorViewModel {
     }
 
     func continueGame() {
+        normalizeSavedProgressIfNeeded()
         guard let progress = savedProgress, progress.hasActiveGame else { return }
         activePuzzle = progress.puzzle
         gameSessionID = UUID()
@@ -77,12 +89,14 @@ final class AppCoordinatorViewModel {
         activePuzzle = nil
         showSuccessOverlay = false
         savedProgress = persistence.loadProgress()
+        normalizeSavedProgressIfNeeded()
     }
 
     func handlePopToHome() {
         activePuzzle = nil
         showSuccessOverlay = false
         savedProgress = persistence.loadProgress()
+        normalizeSavedProgressIfNeeded()
     }
 
     func clearSavedGame() {
@@ -93,6 +107,19 @@ final class AppCoordinatorViewModel {
     private func saveCurrentProgress() {
         guard let puzzle = activePuzzle else { return }
         let progress = GameProgress(puzzle: puzzle, hasActiveGame: true)
+        persistence.saveProgress(progress)
+        savedProgress = progress
+    }
+
+    private func normalizeSavedProgressIfNeeded() {
+        guard var progress = savedProgress, progress.hasActiveGame else { return }
+        guard progress.puzzle.isComplete else { return }
+
+        let nextPuzzle = SudokuGenerator.generate(
+            difficulty: progress.puzzle.difficulty,
+            level: progress.puzzle.level + 1
+        )
+        progress = GameProgress(puzzle: nextPuzzle, hasActiveGame: true)
         persistence.saveProgress(progress)
         savedProgress = progress
     }

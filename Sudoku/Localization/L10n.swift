@@ -16,6 +16,42 @@ enum L10n {
     static var nextLevel: String { String(localized: "next_level") }
     static var home: String { String(localized: "home") }
     static var allCellsFilled: String { String(localized: "all_cells_filled") }
+    static var hintPopupTitle: String { String(localized: "hint_popup_title") }
+    static var hintSuggestedNumber: String { String(localized: "hint_suggested_number") }
+    static var hintApply: String { String(localized: "hint_apply") }
+    static var hintCancel: String { String(localized: "hint_cancel") }
+    static var hintNoNumbers: String { String(localized: "hint_no_numbers") }
+
+    static func hintExplanationRowOnly(value: Int, row: Int) -> String {
+        String(format: String(localized: "hint_explanation_row_only"), row, value)
+    }
+
+    static func hintExplanationColumnOnly(value: Int, column: Int) -> String {
+        String(format: String(localized: "hint_explanation_column_only"), column, value)
+    }
+
+    static func hintExplanationBoxOnly(value: Int) -> String {
+        String(format: String(localized: "hint_explanation_box_only"), value)
+    }
+
+    static func hintExplanationElimination(
+        value: Int,
+        rowNumbers: String,
+        columnNumbers: String,
+        boxNumbers: String
+    ) -> String {
+        String(
+            format: String(localized: "hint_explanation_elimination"),
+            value,
+            rowNumbers,
+            columnNumbers,
+            boxNumbers
+        )
+    }
+
+    static func hintExplanationFallback(value: Int) -> String {
+        String(format: String(localized: "hint_explanation_fallback"), value)
+    }
 
     static var difficultyEasy: String { String(localized: "difficulty_easy") }
     static var difficultyMedium: String { String(localized: "difficulty_medium") }

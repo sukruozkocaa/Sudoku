@@ -10,8 +10,8 @@ struct ContentView: View {
             NavigationStack(path: $coordinator.navigationPath) {
                 HomeView(
                     hasSavedGame: coordinator.hasSavedGame,
-                    savedLevel: coordinator.savedProgress?.puzzle.level,
-                    savedDifficulty: coordinator.savedProgress?.puzzle.difficulty,
+                    savedLevel: coordinator.resumeLevel,
+                    savedDifficulty: coordinator.resumeDifficulty,
                     onStart: {
                         coordinator.requestNewGame()
                     },
