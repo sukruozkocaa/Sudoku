@@ -54,9 +54,6 @@ struct SudokuCellView: View {
     }
 
     private var backgroundColor: Color {
-        if isPassive {
-            return AppTheme.success.opacity(0.08)
-        }
         if isSelected {
             return AppTheme.accent.opacity(0.18)
         }

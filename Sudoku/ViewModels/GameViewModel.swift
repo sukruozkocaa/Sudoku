@@ -8,7 +8,7 @@ final class GameViewModel {
     var selectedRow: Int?
     var selectedColumn: Int?
     var conflictingCells: Set<String> = []
-    var lastCompletedBox: Int?
+    var pendingCompletionFlashes: [CompletedRegion] = []
     var hintMessage: String?
 
     var onPuzzleUpdated: ((SudokuPuzzle) -> Void)?
@@ -18,7 +18,7 @@ final class GameViewModel {
 
     init(puzzle: SudokuPuzzle) {
         self.puzzle = puzzle
-        self.puzzle.refreshCompletedBoxes()
+        self.puzzle.refreshCompletedRegions()
     }
 
     var gridConfig: SudokuGridConfig {
@@ -38,9 +38,7 @@ final class GameViewModel {
     }
 
     func selectCell(row: Int, column: Int) {
-        let boxIndex = gridConfig.boxIndex(row: row, column: column)
-        guard !puzzle.completedBoxes.contains(boxIndex) else { return }
-        guard puzzle.initialGrid[row][column] == nil else { return }
+        guard isCellEditable(row: row, column: column) else { return }
 
         selectedRow = row
         selectedColumn = column
@@ -50,10 +48,7 @@ final class GameViewModel {
 
     func enterNumber(_ number: Int) {
         guard let row = selectedRow, let column = selectedColumn else { return }
-
-        let boxIndex = gridConfig.boxIndex(row: row, column: column)
-        guard !puzzle.completedBoxes.contains(boxIndex) else { return }
-        guard puzzle.initialGrid[row][column] == nil else { return }
+        guard isCellEditable(row: row, column: column) else { return }
 
         moveHistory.append((row, column, puzzle.userGrid[row][column]))
         puzzle.userGrid[row][column] = number
@@ -63,9 +58,7 @@ final class GameViewModel {
     func clearSelectedCell() {
         guard let row = selectedRow, let column = selectedColumn else { return }
         guard puzzle.initialGrid[row][column] == nil else { return }
-
-        let boxIndex = gridConfig.boxIndex(row: row, column: column)
-        guard !puzzle.completedBoxes.contains(boxIndex) else { return }
+        guard isCellEditable(row: row, column: column) else { return }
 
         moveHistory.append((row, column, puzzle.userGrid[row][column]))
         puzzle.userGrid[row][column] = nil
@@ -81,7 +74,7 @@ final class GameViewModel {
         selectedColumn = lastMove.column
         conflictingCells = []
         hintMessage = nil
-        puzzle.refreshCompletedBoxes()
+        puzzle.refreshCompletedRegions()
         onPuzzleUpdated?(puzzle)
     }
 
@@ -113,13 +106,16 @@ final class GameViewModel {
         conflictingCells.contains("\(row)-\(column)")
     }
 
-    func isBoxCompleted(_ boxIndex: Int) -> Bool {
-        puzzle.completedBoxes.contains(boxIndex)
+    func isCellPassive(row: Int, column: Int) -> Bool {
+        isRegionCompleted(row: row, column: column)
+    }
+
+    func clearCompletionFlashes() {
+        pendingCompletionFlashes = []
     }
 
     func isCellEditable(row: Int, column: Int) -> Bool {
-        let boxIndex = gridConfig.boxIndex(row: row, column: column)
-        return puzzle.initialGrid[row][column] == nil && !puzzle.completedBoxes.contains(boxIndex)
+        puzzle.initialGrid[row][column] == nil && !isRegionCompleted(row: row, column: column)
     }
 
     func cellDisplayValue(row: Int, column: Int) -> Int? {
@@ -128,6 +124,13 @@ final class GameViewModel {
 
     func isFixedCell(row: Int, column: Int) -> Bool {
         puzzle.initialGrid[row][column] != nil
+    }
+
+    private func isRegionCompleted(row: Int, column: Int) -> Bool {
+        let boxIndex = gridConfig.boxIndex(row: row, column: column)
+        return puzzle.completedBoxes.contains(boxIndex)
+            || puzzle.completedRows.contains(row)
+            || puzzle.completedColumns.contains(column)
     }
 
     private func applyMoveEffects(row: Int, column: Int) {
@@ -140,9 +143,15 @@ final class GameViewModel {
         )
 
         let previousBoxes = puzzle.completedBoxes
-        puzzle.refreshCompletedBoxes()
-        let newlyCompleted = puzzle.completedBoxes.subtracting(previousBoxes)
-        lastCompletedBox = newlyCompleted.first
+        let previousRows = puzzle.completedRows
+        let previousColumns = puzzle.completedColumns
+        puzzle.refreshCompletedRegions()
+
+        var flashes: [CompletedRegion] = []
+        flashes += puzzle.completedBoxes.subtracting(previousBoxes).sorted().map { .box($0) }
+        flashes += puzzle.completedRows.subtracting(previousRows).sorted().map { .row($0) }
+        flashes += puzzle.completedColumns.subtracting(previousColumns).sorted().map { .column($0) }
+        pendingCompletionFlashes = flashes
 
         onPuzzleUpdated?(puzzle)
 

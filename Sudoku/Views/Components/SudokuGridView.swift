@@ -4,6 +4,8 @@ struct SudokuGridView: View {
     let viewModel: GameViewModel
     let onCellTap: (Int, Int) -> Void
 
+    @State private var flashingRegions: Set<CompletedRegion> = []
+
     private var config: SudokuGridConfig {
         viewModel.gridConfig
     }
@@ -15,6 +17,8 @@ struct SudokuGridView: View {
                 GeometryReader { geometry in
                     let size = min(geometry.size.width, geometry.size.height)
                     let cellSize = size / CGFloat(config.size)
+                    let padding: CGFloat = 8
+                    let gridSpan = cellSize * CGFloat(config.size)
 
                     ZStack {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -28,9 +32,6 @@ struct SudokuGridView: View {
                             ForEach(0..<config.size, id: \.self) { row in
                                 HStack(spacing: 0) {
                                     ForEach(0..<config.size, id: \.self) { column in
-                                        let boxIndex = config.boxIndex(row: row, column: column)
-                                        let isPassive = viewModel.isBoxCompleted(boxIndex)
-
                                         Button {
                                             onCellTap(row, column)
                                         } label: {
@@ -39,7 +40,7 @@ struct SudokuGridView: View {
                                                 isFixed: viewModel.isFixedCell(row: row, column: column),
                                                 isSelected: viewModel.isSelected(row: row, column: column),
                                                 isConflict: viewModel.isConflict(row: row, column: column),
-                                                isPassive: isPassive,
+                                                isPassive: viewModel.isCellPassive(row: row, column: column),
                                                 fontSize: 26,
                                                 showRightBorder: column < config.size - 1,
                                                 showBottomBorder: row < config.size - 1,
@@ -55,11 +56,17 @@ struct SudokuGridView: View {
                             }
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .padding(8)
+                        .padding(padding)
 
-                        ForEach(0..<config.boxCount, id: \.self) { boxIndex in
-                            if viewModel.isBoxCompleted(boxIndex) {
-                                completedBoxOverlay(boxIndex: boxIndex, cellSize: cellSize)
+                        ForEach(Array(flashingRegions).sorted(by: regionSortOrder), id: \.self) { region in
+                            RegionFlashOverlay(
+                                region: region,
+                                cellSize: cellSize,
+                                gridSize: config.size,
+                                config: config,
+                                padding: padding
+                            ) {
+                                flashingRegions.remove(region)
                             }
                         }
                     }
@@ -68,23 +75,97 @@ struct SudokuGridView: View {
                 }
             }
             .frame(maxWidth: 320)
+            .onChange(of: viewModel.pendingCompletionFlashes) { _, flashes in
+                guard !flashes.isEmpty else { return }
+                flashingRegions.formUnion(flashes)
+                viewModel.clearCompletionFlashes()
+            }
     }
 
-    @ViewBuilder
-    private func completedBoxOverlay(boxIndex: Int, cellSize: CGFloat) -> some View {
-        let origin = config.boxOrigin(for: boxIndex)
-        let padding: CGFloat = 8
-        let x = padding + CGFloat(origin.column) * cellSize
-        let y = padding + CGFloat(origin.row) * cellSize
-        let boxWidth = cellSize * CGFloat(config.boxWidth)
-        let boxHeight = cellSize * CGFloat(config.boxHeight)
+    private func regionSortOrder(_ lhs: CompletedRegion, _ rhs: CompletedRegion) -> Bool {
+        String(describing: lhs) < String(describing: rhs)
+    }
+}
+
+private struct RegionFlashOverlay: View {
+    let region: CompletedRegion
+    let cellSize: CGFloat
+    let gridSize: Int
+    let config: SudokuGridConfig
+    let padding: CGFloat
+    let onFinished: () -> Void
+
+    @State private var opacity: Double = 0
+    @State private var scale: CGFloat = 0.92
+
+    var body: some View {
+        let frame = regionFrame
+        let position = regionPosition
 
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .stroke(AppTheme.success, lineWidth: 3)
-            .frame(width: boxWidth - 4, height: boxHeight - 4)
-            .position(x: x + boxWidth / 2, y: y + boxHeight / 2)
-            .transition(.scale.combined(with: .opacity))
-            .animation(.spring(response: 0.45, dampingFraction: 0.7), value: viewModel.isBoxCompleted(boxIndex))
+            .fill(AppTheme.success.opacity(0.22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(AppTheme.success, lineWidth: 3)
+            )
+            .frame(width: frame.width, height: frame.height)
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .position(x: position.x, y: position.y)
+            .allowsHitTesting(false)
+            .onAppear {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.72)) {
+                    opacity = 1
+                    scale = 1
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        opacity = 0
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        onFinished()
+                    }
+                }
+            }
+    }
+
+    private var regionFrame: (width: CGFloat, height: CGFloat) {
+        let gridSpan = cellSize * CGFloat(gridSize)
+
+        switch region {
+        case .box(let boxIndex):
+            let boxWidth = cellSize * CGFloat(config.boxWidth)
+            let boxHeight = cellSize * CGFloat(config.boxHeight)
+            return (boxWidth - 4, boxHeight - 4)
+        case .row:
+            return (gridSpan - 4, cellSize - 4)
+        case .column:
+            return (cellSize - 4, gridSpan - 4)
+        }
+    }
+
+    private var regionPosition: (x: CGFloat, y: CGFloat) {
+        let gridSpan = cellSize * CGFloat(gridSize)
+        let centerX = padding + gridSpan / 2
+        let centerY = padding + gridSpan / 2
+
+        switch region {
+        case .box(let boxIndex):
+            let origin = config.boxOrigin(for: boxIndex)
+            let boxWidth = cellSize * CGFloat(config.boxWidth)
+            let boxHeight = cellSize * CGFloat(config.boxHeight)
+            let x = padding + CGFloat(origin.column) * cellSize + boxWidth / 2
+            let y = padding + CGFloat(origin.row) * cellSize + boxHeight / 2
+            return (x, y)
+        case .row(let row):
+            let y = padding + CGFloat(row) * cellSize + cellSize / 2
+            return (centerX, y)
+        case .column(let column):
+            let x = padding + CGFloat(column) * cellSize + cellSize / 2
+            return (x, centerY)
+        }
     }
 }
 
