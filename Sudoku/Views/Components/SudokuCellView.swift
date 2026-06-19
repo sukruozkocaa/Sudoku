@@ -12,6 +12,8 @@ struct SudokuCellView: View {
     let showBoxRightBorder: Bool
     let showBoxBottomBorder: Bool
 
+    @Environment(\.themePalette) private var theme
+
     var body: some View {
         ZStack {
             Rectangle()
@@ -26,28 +28,28 @@ struct SudokuCellView: View {
         .overlay(alignment: .trailing) {
             if showRightBorder {
                 Rectangle()
-                    .fill(Color.white.opacity(0.18))
+                    .fill(theme.cellBorder)
                     .frame(width: showBoxRightBorder ? 2 : 0.5)
             }
         }
         .overlay(alignment: .bottom) {
             if showBottomBorder {
                 Rectangle()
-                    .fill(Color.white.opacity(0.18))
+                    .fill(theme.cellBorder)
                     .frame(height: showBoxBottomBorder ? 2 : 0.5)
             }
         }
         .overlay {
             if isSelected {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(AppTheme.accent, lineWidth: 2)
+                    .stroke(theme.accent, lineWidth: 2)
                     .padding(2)
             }
         }
         .overlay {
             if isConflict {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(AppTheme.error.opacity(0.8), lineWidth: 2)
+                    .stroke(theme.error.opacity(0.8), lineWidth: 2)
                     .padding(2)
             }
         }
@@ -55,23 +57,25 @@ struct SudokuCellView: View {
 
     private var backgroundColor: Color {
         if isSelected {
-            return AppTheme.accent.opacity(0.18)
+            return theme.accent.opacity(0.18)
         }
-        return Color.white.opacity(0.03)
+        return theme.cellBackground
     }
 
     private var numberColor: Color {
         if isPassive {
-            return AppTheme.passiveNumber
+            return theme.passiveNumber
         }
         if isFixed {
-            return AppTheme.fixedNumber
+            return theme.fixedNumber
         }
-        return AppTheme.userNumber
+        return theme.userNumber
     }
 }
 
 #Preview {
+    let themeStore = ThemeStore()
+
     HStack {
         SudokuCellView(
             value: 5,
@@ -98,4 +102,6 @@ struct SudokuCellView: View {
     }
     .frame(height: 44)
     .premiumBackground()
+    .environment(themeStore)
+    .themeAware(using: themeStore)
 }

@@ -8,6 +8,9 @@ struct HomeView: View {
     let onContinue: () -> Void
     let onShowHowToPlay: () -> Void
 
+    @Environment(\.themePalette) private var theme
+    @Environment(ThemeStore.self) private var themeStore
+    @State private var showSettings = false
     @State private var heroAppeared = false
     @State private var titleAppeared = false
     @State private var taglineAppeared = false
@@ -16,7 +19,7 @@ struct HomeView: View {
     @State private var buttonGlow = false
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack {
             VStack(spacing: 0) {
                 Spacer()
 
@@ -29,12 +32,12 @@ struct HomeView: View {
                     VStack(spacing: 14) {
                         Text(L10n.appName)
                             .font(.system(size: 52, weight: .bold, design: .rounded))
-                            .foregroundStyle(AppTheme.accentGradient)
-                            .shadow(color: AppTheme.accent.opacity(0.35), radius: 18, y: 6)
+                            .foregroundStyle(theme.accentGradient)
+                            .shadow(color: theme.accent.opacity(0.35), radius: 18, y: 6)
 
                         Text(L10n.homeTagline)
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundStyle(AppTheme.textSecondary)
+                            .foregroundStyle(theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                             .opacity(taglineAppeared ? 1 : 0)
@@ -70,7 +73,7 @@ struct HomeView: View {
                     .overlay {
                         if !hasSavedGame {
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(AppTheme.accent.opacity(buttonGlow ? 0.45 : 0.15), lineWidth: 1.5)
+                                .stroke(theme.accent.opacity(buttonGlow ? 0.45 : 0.15), lineWidth: 1.5)
                                 .scaleEffect(buttonGlow ? 1.04 : 1)
                                 .blur(radius: 1)
                         }
@@ -82,30 +85,52 @@ struct HomeView: View {
                 .padding(.bottom, 48)
             }
 
-            Button(action: onShowHowToPlay) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(AppTheme.cardBackground)
-                            .overlay(
-                                Circle()
-                                    .stroke(AppTheme.cardBorder, lineWidth: 1)
-                            )
-                    )
+            VStack {
+                HStack {
+                    iconButton(systemName: "gearshape.fill", accessibility: L10n.settingsTitle) {
+                        showSettings = true
+                    }
+
+                    Spacer()
+
+                    iconButton(systemName: "info.circle.fill", accessibility: L10n.howToPlayTitle) {
+                        onShowHowToPlay()
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
+                .opacity(buttonsAppeared ? 1 : 0)
+
+                Spacer()
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(L10n.howToPlayTitle)
-            .padding(.top, 8)
-            .padding(.trailing, 24)
-            .opacity(buttonsAppeared ? 1 : 0)
         }
         .premiumBackground(animated: true)
+        .sheet(isPresented: $showSettings) {
+            SettingsSheet()
+                .environment(themeStore)
+        }
         .onAppear {
             runEntranceAnimations()
         }
+    }
+
+    private func iconButton(systemName: String, accessibility: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(theme.accent)
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(theme.cardBackground)
+                        .overlay(
+                            Circle()
+                                .stroke(theme.cardBorder, lineWidth: 1)
+                        )
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibility)
     }
 
     private func runEntranceAnimations() {
@@ -136,6 +161,8 @@ struct HomeView: View {
 }
 
 #Preview {
+    let themeStore = ThemeStore()
+
     HomeView(
         hasSavedGame: true,
         savedLevel: 3,
@@ -144,4 +171,6 @@ struct HomeView: View {
         onContinue: {},
         onShowHowToPlay: {}
     )
+    .environment(themeStore)
+    .themeAware(using: themeStore)
 }

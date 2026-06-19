@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GameView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themePalette) private var theme
 
     @State private var viewModel: GameViewModel
     let onPuzzleUpdated: (SudokuPuzzle) -> Void
@@ -86,9 +87,9 @@ struct GameView: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(theme.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(AppTheme.cardBackground, in: Circle())
+                    .background(theme.cardBackground, in: Circle())
             }
 
             Spacer()
@@ -96,11 +97,11 @@ struct GameView: View {
             VStack(spacing: 4) {
                 Text(viewModel.levelText)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(theme.textPrimary)
 
                 Text(viewModel.difficultyText)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
             }
 
             Spacer()
@@ -124,15 +125,15 @@ struct GameView: View {
                     Text(L10n.hint)
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
                 }
-                .foregroundStyle(AppTheme.accent)
+                .foregroundStyle(theme.accent)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(AppTheme.accent.opacity(0.12))
+                        .fill(theme.accent.opacity(0.12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(AppTheme.accent.opacity(0.25), lineWidth: 1)
+                                .stroke(theme.accent.opacity(0.25), lineWidth: 1)
                         )
                 )
             }

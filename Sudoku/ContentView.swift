@@ -96,5 +96,9 @@ struct ContentView: View {
 }
 
 #Preview {
+    let themeStore = ThemeStore()
+
     ContentView()
+        .environment(themeStore)
+        .themeAware(using: themeStore)
 }

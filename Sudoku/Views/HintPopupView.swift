@@ -6,6 +6,7 @@ struct HintPopupView: View {
     let onApply: () -> Void
     let onCancel: () -> Void
 
+    @Environment(\.themePalette) private var theme
     @State private var appear = false
 
     private var config: SudokuGridConfig {
@@ -14,7 +15,7 @@ struct HintPopupView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(appear ? 0.58 : 0)
+            theme.overlayScrim.opacity(appear ? 1 : 0)
                 .ignoresSafeArea()
                 .onTapGesture(perform: onCancel)
 
@@ -22,11 +23,11 @@ struct HintPopupView: View {
                 HStack {
                     Image(systemName: "lightbulb.fill")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(AppTheme.accent)
+                        .foregroundStyle(theme.accent)
 
                     Text(L10n.hintPopupTitle)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppTheme.textPrimary)
+                        .foregroundStyle(theme.textPrimary)
 
                     Spacer()
                 }
@@ -41,25 +42,25 @@ struct HintPopupView: View {
                 VStack(spacing: 10) {
                     Text(L10n.hintSuggestedNumber)
                         .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(theme.textSecondary)
 
                     Text("\(suggestion.value)")
                         .font(.system(size: 52, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppTheme.accentGradient)
+                        .foregroundStyle(theme.accentGradient)
                         .frame(width: 84, height: 84)
                         .background(
                             Circle()
-                                .fill(AppTheme.accent.opacity(0.12))
+                                .fill(theme.accent.opacity(0.12))
                                 .overlay(
                                     Circle()
-                                        .stroke(AppTheme.accent.opacity(0.35), lineWidth: 1.5)
+                                        .stroke(theme.accent.opacity(0.35), lineWidth: 1.5)
                                 )
                         )
                 }
 
                 Text(suggestion.explanation)
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
+                    .foregroundStyle(theme.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -78,10 +79,10 @@ struct HintPopupView: View {
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(AppTheme.backgroundBottom)
+                    .fill(theme.sheetBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                            .stroke(theme.cardBorder, lineWidth: 1)
                     )
             )
             .padding(.horizontal, 28)
@@ -101,6 +102,8 @@ private struct HintGridPreview: View {
     let highlightedRow: Int
     let highlightedColumn: Int
 
+    @Environment(\.themePalette) private var theme
+
     private var config: SudokuGridConfig {
         puzzle.gridConfig
     }
@@ -117,10 +120,10 @@ private struct HintGridPreview: View {
 
                     ZStack {
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(AppTheme.cardBackground)
+                            .fill(theme.cardBackground)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(AppTheme.cardBorder, lineWidth: 1)
+                                    .stroke(theme.cardBorder, lineWidth: 1)
                             )
 
                         VStack(spacing: 0) {
@@ -150,7 +153,7 @@ private struct HintGridPreview: View {
                                         .background {
                                             if !isTarget && (isSameRow || isSameColumn || isSameBox) {
                                                 Rectangle()
-                                                    .fill(AppTheme.accent.opacity(0.08))
+                                                    .fill(theme.accent.opacity(0.08))
                                             }
                                         }
                                         .frame(width: cellSize, height: cellSize)

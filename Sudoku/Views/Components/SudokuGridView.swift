@@ -4,6 +4,7 @@ struct SudokuGridView: View {
     let viewModel: GameViewModel
     let onCellTap: (Int, Int) -> Void
 
+    @Environment(\.themePalette) private var theme
     @State private var flashingRegions: Set<CompletedRegion> = []
 
     private var config: SudokuGridConfig {
@@ -22,10 +23,10 @@ struct SudokuGridView: View {
 
                     ZStack {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(AppTheme.cardBackground)
+                            .fill(theme.cardBackground)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .stroke(AppTheme.cardBorder, lineWidth: 1)
+                                    .stroke(theme.cardBorder, lineWidth: 1)
                             )
 
                         VStack(spacing: 0) {
@@ -95,6 +96,7 @@ private struct RegionFlashOverlay: View {
     let padding: CGFloat
     let onFinished: () -> Void
 
+    @Environment(\.themePalette) private var theme
     @State private var opacity: Double = 0
     @State private var scale: CGFloat = 0.92
 
@@ -103,10 +105,10 @@ private struct RegionFlashOverlay: View {
         let position = regionPosition
 
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(AppTheme.success.opacity(0.22))
+            .fill(theme.success.opacity(0.22))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(AppTheme.success, lineWidth: 3)
+                    .stroke(theme.success, lineWidth: 3)
             )
             .frame(width: frame.width, height: frame.height)
             .scaleEffect(scale)

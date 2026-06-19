@@ -11,6 +11,7 @@ struct HowToPlayView: View {
     let onFinish: () -> Void
     let onSkip: () -> Void
 
+    @Environment(\.themePalette) private var theme
     @State private var currentStep = 0
     @State private var appear = false
     @State private var contentAppeared = false
@@ -60,14 +61,14 @@ struct HowToPlayView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(appear ? 0.62 : 0)
+            theme.overlayScrim.opacity(appear ? 1 : 0)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 HStack {
                     Text(L10n.howToPlayTitle)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(theme.textSecondary)
                         .textCase(.uppercase)
                         .tracking(1.2)
 
@@ -76,12 +77,12 @@ struct HowToPlayView: View {
                     Button(action: onSkip) {
                         Text(L10n.howToPlaySkip)
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundStyle(AppTheme.textSecondary)
+                            .foregroundStyle(theme.textSecondary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(
                                 Capsule()
-                                    .fill(Color.white.opacity(0.08))
+                                    .fill(theme.cardBackground)
                             )
                     }
                     .buttonStyle(.plain)
@@ -97,8 +98,8 @@ struct HowToPlayView: View {
                             .fill(
                                 RadialGradient(
                                     colors: [
-                                        AppTheme.accent.opacity(0.22),
-                                        AppTheme.accentSecondary.opacity(0.08)
+                                        theme.accent.opacity(0.22),
+                                        theme.accentSecondary.opacity(0.08)
                                     ],
                                     center: .center,
                                     startRadius: 8,
@@ -108,24 +109,24 @@ struct HowToPlayView: View {
                             .frame(width: 112, height: 112)
 
                         Circle()
-                            .stroke(AppTheme.accent.opacity(0.25), lineWidth: 1.5)
+                            .stroke(theme.accent.opacity(0.25), lineWidth: 1.5)
                             .frame(width: 112, height: 112)
 
                         Image(systemName: step.icon)
                             .font(.system(size: 40, weight: .semibold))
-                            .foregroundStyle(AppTheme.accentGradient)
+                            .foregroundStyle(theme.accentGradient)
                             .symbolEffect(.bounce, value: currentStep)
                     }
 
                     VStack(spacing: 12) {
                         Text(step.title)
                             .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .foregroundStyle(AppTheme.textPrimary)
+                            .foregroundStyle(theme.textPrimary)
                             .multilineTextAlignment(.center)
 
                         Text(step.message)
                             .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundStyle(AppTheme.textSecondary)
+                            .foregroundStyle(theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
@@ -161,12 +162,12 @@ struct HowToPlayView: View {
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(AppTheme.backgroundBottom)
+                    .fill(theme.sheetBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                            .stroke(theme.cardBorder, lineWidth: 1)
                     )
-                    .shadow(color: AppTheme.accent.opacity(0.12), radius: 30, y: 16)
+                    .shadow(color: theme.accent.opacity(0.12), radius: 30, y: 16)
             )
             .padding(.horizontal, 24)
             .scaleEffect(appear ? 1 : 0.92)
@@ -186,15 +187,15 @@ struct HowToPlayView: View {
         VStack(spacing: 10) {
             Text(L10n.howToPlayStepProgress(current: currentStep + 1, total: steps.count))
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(theme.textSecondary)
 
             HStack(spacing: 8) {
                 ForEach(steps) { item in
                     Capsule()
                         .fill(
                             item.id <= currentStep
-                                ? AnyShapeStyle(AppTheme.accentGradient)
-                                : AnyShapeStyle(Color.white.opacity(0.12))
+                                ? AnyShapeStyle(theme.accentGradient)
+                                : AnyShapeStyle(theme.cardBackground)
                         )
                         .frame(width: item.id == currentStep ? 28 : 8, height: 8)
                         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: currentStep)

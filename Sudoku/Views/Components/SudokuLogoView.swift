@@ -6,6 +6,8 @@ struct SudokuLogoView: View {
     var animateCells: Bool = false
     var animateRing: Bool = true
 
+    @Environment(\.themePalette) private var theme
+
     private let cellValues: [[String]] = [
         ["5", "3", ""],
         ["6", "", ""],
@@ -28,7 +30,7 @@ struct SudokuLogoView: View {
                     .fill(
                         RadialGradient(
                             colors: [
-                                AppTheme.accent.opacity(0.14 * glowPulse),
+                                theme.accent.opacity(0.14 * glowPulse),
                                 .clear
                             ],
                             center: .center,
@@ -42,10 +44,10 @@ struct SudokuLogoView: View {
                     .stroke(
                         AngularGradient(
                             colors: [
-                                AppTheme.accent.opacity(0.04),
-                                AppTheme.accent.opacity(0.55),
-                                AppTheme.accentSecondary.opacity(0.75),
-                                AppTheme.accent.opacity(0.04)
+                                theme.accent.opacity(0.04),
+                                theme.accent.opacity(0.55),
+                                theme.accentSecondary.opacity(0.75),
+                                theme.accent.opacity(0.04)
                             ],
                             center: .center
                         ),
@@ -56,13 +58,13 @@ struct SudokuLogoView: View {
             }
 
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(AppTheme.cardBackground)
+                .fill(theme.cardBackground)
                 .frame(width: size, height: size)
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                        .stroke(theme.cardBorder, lineWidth: 1)
                 )
-                .shadow(color: AppTheme.accent.opacity(0.2), radius: 20, y: 10)
+                .shadow(color: theme.accent.opacity(0.2), radius: 20, y: 10)
                 .overlay {
                     VStack(spacing: size * 0.036) {
                         ForEach(0..<3, id: \.self) { row in
@@ -114,9 +116,9 @@ struct SudokuLogoView: View {
     private func miniCell(_ value: String) -> some View {
         Text(value)
             .font(.system(size: size * 0.1, weight: .bold, design: .rounded))
-            .foregroundStyle(value.isEmpty ? .clear : AppTheme.userNumber)
+            .foregroundStyle(value.isEmpty ? .clear : theme.userNumber)
             .frame(width: size * 0.2, height: size * 0.2)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: size * 0.055, style: .continuous))
+            .background(theme.logoCellBackground, in: RoundedRectangle(cornerRadius: size * 0.055, style: .continuous))
     }
 
     private func cellOpacity(for index: Int) -> Double {
@@ -129,8 +131,12 @@ struct SudokuLogoView: View {
 }
 
 #Preview {
+    let themeStore = ThemeStore()
+
     ZStack {
-        AppTheme.backgroundGradient.ignoresSafeArea()
+        PremiumBackgroundLayer(animated: false)
         SudokuLogoView(size: 120, animateCells: true)
     }
+    .environment(themeStore)
+    .themeAware(using: themeStore)
 }

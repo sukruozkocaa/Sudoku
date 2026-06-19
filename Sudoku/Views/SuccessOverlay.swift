@@ -5,34 +5,35 @@ struct SuccessOverlay: View {
     let onNextLevel: () -> Void
     let onHome: () -> Void
 
+    @Environment(\.themePalette) private var theme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: Double = 0
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.55)
+            theme.overlayScrim
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
                 ZStack {
                     Circle()
-                        .fill(AppTheme.success.opacity(0.15))
+                        .fill(theme.success.opacity(0.15))
                         .frame(width: 100, height: 100)
 
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 52))
-                        .foregroundStyle(AppTheme.success)
+                        .foregroundStyle(theme.success)
                         .symbolEffect(.bounce, value: level)
                 }
 
                 VStack(spacing: 8) {
                     Text(L10n.congratulations)
                         .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundStyle(AppTheme.textPrimary)
+                        .foregroundStyle(theme.textPrimary)
 
                     Text(L10n.levelCompleted(level))
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(theme.textSecondary)
                 }
 
                 VStack(spacing: 12) {
@@ -50,10 +51,10 @@ struct SuccessOverlay: View {
             .padding(28)
             .background(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(AppTheme.backgroundBottom)
+                    .fill(theme.sheetBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                            .stroke(theme.cardBorder, lineWidth: 1)
                     )
             )
             .padding(.horizontal, 32)

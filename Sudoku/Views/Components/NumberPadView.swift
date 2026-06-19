@@ -6,6 +6,8 @@ struct NumberPadView: View {
     let onClear: () -> Void
     let onUndo: () -> Void
 
+    @Environment(\.themePalette) private var theme
+
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
 
     var body: some View {
@@ -29,7 +31,7 @@ struct NumberPadView: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 24, weight: .semibold, design: .rounded))
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(theme.textPrimary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .background(buttonBackground)
@@ -45,7 +47,7 @@ struct NumberPadView: View {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
             }
-            .foregroundStyle(AppTheme.textSecondary)
+            .foregroundStyle(theme.textSecondary)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
             .background(buttonBackground)
@@ -55,16 +57,20 @@ struct NumberPadView: View {
 
     private var buttonBackground: some View {
         RoundedRectangle(cornerRadius: 16, style: .continuous)
-            .fill(AppTheme.cardBackground)
+            .fill(theme.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(AppTheme.cardBorder, lineWidth: 1)
+                    .stroke(theme.cardBorder, lineWidth: 1)
             )
     }
 }
 
 #Preview {
+    let themeStore = ThemeStore()
+
     NumberPadView(config: .mini, onNumberTap: { _ in }, onClear: {}, onUndo: {})
         .padding()
         .premiumBackground()
+        .environment(themeStore)
+        .themeAware(using: themeStore)
 }
