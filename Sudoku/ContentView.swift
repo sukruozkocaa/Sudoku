@@ -45,7 +45,12 @@ struct ContentView: View {
                 SuccessOverlay(
                     level: puzzle.level,
                     onNextLevel: {
-                        coordinator.advanceToNextLevel()
+                        coordinator.showSuccessOverlay = false
+                        DispatchQueue.main.async {
+                            InterstitialAdManager.shared.showAdIfAppropriate(for: .nextLevel) {
+                                coordinator.advanceToNextLevel()
+                            }
+                        }
                     },
                     onHome: {
                         coordinator.returnHome()
@@ -72,6 +77,10 @@ struct ContentView: View {
                 .transition(.opacity)
                 .zIndex(4)
             }
+        }
+        .background {
+            AdPresentationAnchorView()
+                .frame(width: 0, height: 0)
         }
         .animation(.easeInOut(duration: 0.5), value: coordinator.showSplash)
         .animation(.easeInOut(duration: 0.3), value: coordinator.showHowToPlay)

@@ -60,6 +60,10 @@ struct GameView: View {
         .onAppear {
             viewModel.onPuzzleUpdated = onPuzzleUpdated
             viewModel.onPuzzleCompleted = onPuzzleCompleted
+
+            DispatchQueue.main.async {
+                InterstitialAdManager.shared.showAdIfAppropriate(for: .gameplayEntry) { }
+            }
         }
         .overlay {
             if let hint = viewModel.activeHint {
@@ -117,7 +121,9 @@ struct GameView: View {
     private var hintBar: some View {
         HStack(spacing: 12) {
             Button {
-                viewModel.requestHint()
+                InterstitialAdManager.shared.showAdIfAppropriate(for: .hint) {
+                    viewModel.requestHint()
+                }
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "lightbulb.fill")

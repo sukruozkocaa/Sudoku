@@ -4,6 +4,10 @@ import SwiftUI
 struct SudokuApp: App {
     @State private var themeStore = ThemeStore()
 
+    init() {
+        InterstitialAdManager.shared.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
