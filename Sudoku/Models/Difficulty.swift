@@ -32,7 +32,12 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
     }
 
     var gridConfig: SudokuGridConfig {
-        .mini
+        switch self {
+        case .easy, .medium:
+            .mini
+        case .hard:
+            .standard
+        }
     }
 
     var showsHint: Bool {
@@ -51,8 +56,8 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
             base = 26
             minimum = 18
         case .hard:
-            base = 22
-            minimum = 14
+            base = 29
+            minimum = 21
         }
 
         let reduction = max(0, level - 1)

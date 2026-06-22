@@ -138,13 +138,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Few clues · tough puzzles"
+            "value" : "Few clues · classic 9×9 Sudoku"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az ipucu · zorlu bulmaca"
+            "value" : "Az ipucu · klasik 9×9 Sudoku"
           }
         }
       }
@@ -250,13 +250,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In this 3×2 block, only %lld is missing. That number must go in the highlighted cell."
+            "value" : "In this %1$lld×%2$lld block, only %3$lld is missing. That number must go in the highlighted cell."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu 3×2 kutuda yalnızca %lld eksik. Bu sayı işaretli hücreye gelmeli."
+            "value" : "Bu %1$lld×%2$lld kutuda yalnızca %3$lld eksik. Bu sayı işaretli hücreye gelmeli."
           }
         }
       }

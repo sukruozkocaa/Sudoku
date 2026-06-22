@@ -30,8 +30,8 @@ enum L10n {
         String(format: String(localized: "hint_explanation_column_only"), column, value)
     }
 
-    static func hintExplanationBoxOnly(value: Int) -> String {
-        String(format: String(localized: "hint_explanation_box_only"), value)
+    static func hintExplanationBoxOnly(value: Int, boxHeight: Int, boxWidth: Int) -> String {
+        String(format: String(localized: "hint_explanation_box_only"), boxHeight, boxWidth, value)
     }
 
     static func hintExplanationElimination(

@@ -43,7 +43,11 @@ enum HintExplanationService {
         }
 
         if missingInBox == [value] {
-            return L10n.hintExplanationBoxOnly(value: value)
+            return L10n.hintExplanationBoxOnly(
+                value: value,
+                boxHeight: config.boxHeight,
+                boxWidth: config.boxWidth
+            )
         }
 
         if candidates == [value] {

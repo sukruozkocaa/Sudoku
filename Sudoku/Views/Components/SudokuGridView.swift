@@ -42,7 +42,7 @@ struct SudokuGridView: View {
                                                 isSelected: viewModel.isSelected(row: row, column: column),
                                                 isConflict: viewModel.isConflict(row: row, column: column),
                                                 isPassive: viewModel.isCellPassive(row: row, column: column),
-                                                fontSize: 26,
+                                                fontSize: config.size <= 6 ? 26 : 20,
                                                 showRightBorder: column < config.size - 1,
                                                 showBottomBorder: row < config.size - 1,
                                                 showBoxRightBorder: config.isBoxRightBorder(column: column),

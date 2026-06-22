@@ -69,6 +69,8 @@ final class GameViewModel {
     }
 
     func undoLastMove() {
+        purgeLockedMoveHistory()
+
         guard let lastMove = moveHistory.popLast() else { return }
         puzzle.userGrid[lastMove.row][lastMove.column] = lastMove.previous
         selectedRow = lastMove.row
@@ -76,6 +78,7 @@ final class GameViewModel {
         conflictingCells = []
         hintMessage = nil
         puzzle.refreshCompletedRegions()
+        purgeLockedMoveHistory()
         onPuzzleUpdated?(puzzle)
     }
 
@@ -159,6 +162,12 @@ final class GameViewModel {
             || puzzle.completedColumns.contains(column)
     }
 
+    private func purgeLockedMoveHistory() {
+        moveHistory.removeAll { move in
+            isRegionCompleted(row: move.row, column: move.column)
+        }
+    }
+
     private func applyMoveEffects(row: Int, column: Int) {
         let value = puzzle.userGrid[row][column] ?? 0
         conflictingCells = SudokuValidator.conflictingPositions(
@@ -172,6 +181,7 @@ final class GameViewModel {
         let previousRows = puzzle.completedRows
         let previousColumns = puzzle.completedColumns
         puzzle.refreshCompletedRegions()
+        purgeLockedMoveHistory()
 
         var flashes: [CompletedRegion] = []
         flashes += puzzle.completedBoxes.subtracting(previousBoxes).sorted().map { .box($0) }
