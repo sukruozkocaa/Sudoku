@@ -1,0 +1,18 @@
+{
+  "ads": {
+    "enabled": true,
+    "interstitial_ad_unit_id": "ca-app-pub-8217658595396953/5783955503",
+    "minimum_seconds_between_ads": 120,
+    "gameplay_entries_between_ads": 2,
+    "on_gameplay_entry": true,
+    "on_hint": true,
+    "on_next_level": true
+  },
+  "features": {
+    "hints": true,
+    "daily_challenge": true,
+    "pencil_notes": true,
+    "stats": true,
+    "achievements": true
+  }
+}

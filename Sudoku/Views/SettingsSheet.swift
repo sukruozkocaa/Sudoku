@@ -6,6 +6,7 @@ struct SettingsSheet: View {
     @Environment(ThemeStore.self) private var themeStore
     @Environment(FeedbackStore.self) private var feedbackStore
     @Environment(StatsStore.self) private var statsStore
+    @Environment(RemoteConfigStore.self) private var remoteConfigStore
     @Environment(\.themePalette) private var theme
 
     var body: some View {
@@ -62,58 +63,70 @@ struct SettingsSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 24)
 
-                Text(L10n.settingsGameplayNote)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
+                if remoteConfigStore.config.pencilNotesEnabled {
+                    Text(L10n.settingsGameplayNote)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
 
-                VStack(spacing: 12) {
-                    feedbackToggle(
-                        icon: "pencil.and.outline",
-                        title: L10n.settingsPencilDefault,
-                        subtitle: L10n.settingsPencilDefaultSubtitle,
-                        isOn: Bindable(statsStore).pencilModeEnabledByDefault
-                    )
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
-
-                Text(L10n.settingsStatsNote)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
-
-                VStack(spacing: 12) {
-                    statRow(icon: "checkmark.circle.fill", title: L10n.statPuzzlesCompleted, value: "\(statsStore.stats.puzzlesCompleted)")
-                    statRow(icon: "flame.fill", title: L10n.statBestStreak, value: "\(max(statsStore.stats.bestStreak, statsStore.stats.currentStreak))")
-                    statRow(icon: "clock.fill", title: L10n.statPlayTime, value: StatsStore.formatDurationLong(statsStore.stats.totalPlayTimeSeconds))
-                    statRow(icon: "calendar.circle.fill", title: L10n.statDailyCompleted, value: "\(statsStore.stats.dailyCompletedCount)")
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
-
-                Text(L10n.settingsAchievements)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 16)
-
-                VStack(spacing: 12) {
-                    ForEach(AchievementID.allCases) { achievement in
-                        achievementRow(achievement)
+                    VStack(spacing: 12) {
+                        feedbackToggle(
+                            icon: "pencil.and.outline",
+                            title: L10n.settingsPencilDefault,
+                            subtitle: L10n.settingsPencilDefaultSubtitle,
+                            isOn: Bindable(statsStore).pencilModeEnabledByDefault
+                        )
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+
+                if remoteConfigStore.config.statsEnabled {
+                    Text(L10n.settingsStatsNote)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+
+                    VStack(spacing: 12) {
+                        statRow(icon: "checkmark.circle.fill", title: L10n.statPuzzlesCompleted, value: "\(statsStore.stats.puzzlesCompleted)")
+                        statRow(icon: "flame.fill", title: L10n.statBestStreak, value: "\(max(statsStore.stats.bestStreak, statsStore.stats.currentStreak))")
+                        statRow(icon: "clock.fill", title: L10n.statPlayTime, value: StatsStore.formatDurationLong(statsStore.stats.totalPlayTimeSeconds))
+                        statRow(icon: "calendar.circle.fill", title: L10n.statDailyCompleted, value: "\(statsStore.stats.dailyCompletedCount)")
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                }
+
+                if remoteConfigStore.config.achievementsEnabled {
+                    Text(L10n.settingsAchievements)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+
+                    VStack(spacing: 12) {
+                        ForEach(AchievementID.allCases) { achievement in
+                            achievementRow(achievement)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                }
 
                 rateAppButton
                     .padding(.horizontal, 20)
                     .padding(.bottom, 16)
+
+                #if DEBUG
+                RemoteConfigDebugPanel()
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+                #endif
 
                 Text(AppInfo.versionLabel)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -353,9 +366,11 @@ struct SettingsSheet: View {
                 .environment(themeStore)
                 .environment(feedbackStore)
                 .environment(statsStore)
+                .environment(RemoteConfigStore.shared)
         }
         .environment(themeStore)
         .environment(feedbackStore)
         .environment(statsStore)
+        .environment(RemoteConfigStore.shared)
         .themeAware(using: themeStore)
 }

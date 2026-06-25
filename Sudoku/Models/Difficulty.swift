@@ -40,10 +40,6 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var showsHint: Bool {
-        true
-    }
-
     func baseClueCount(for level: Int) -> Int {
         let base: Int
         let minimum: Int

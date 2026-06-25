@@ -13,6 +13,7 @@ struct HomeView: View {
     @Environment(ThemeStore.self) private var themeStore
     @Environment(FeedbackStore.self) private var feedbackStore
     @Environment(StatsStore.self) private var statsStore
+    @Environment(RemoteConfigStore.self) private var remoteConfigStore
     @State private var showSettings = false
     @State private var heroAppeared = false
     @State private var titleAppeared = false
@@ -49,14 +50,16 @@ struct HomeView: View {
                 Spacer(minLength: 32)
 
                 VStack(spacing: 16) {
-                    if statsStore.stats.currentStreak > 0 {
+                    if remoteConfigStore.config.statsEnabled, statsStore.stats.currentStreak > 0 {
                         streakBadge
                             .opacity(buttonsAppeared ? 1 : 0)
                     }
 
-                    dailyChallengeCard
-                        .padding(.horizontal, 28)
-                        .opacity(buttonsAppeared ? 1 : 0)
+                    if remoteConfigStore.config.dailyChallengeEnabled {
+                        dailyChallengeCard
+                            .padding(.horizontal, 28)
+                            .opacity(buttonsAppeared ? 1 : 0)
+                    }
 
                     VStack(spacing: 14) {
                         if hasSavedGame {
@@ -95,6 +98,7 @@ struct HomeView: View {
             VStack {
                 HStack {
                     iconButton(systemName: "gearshape.fill", accessibility: L10n.settingsTitle) {
+                        AnalyticsService.logSettingsOpen()
                         showSettings = true
                     }
 
@@ -117,6 +121,7 @@ struct HomeView: View {
                 .environment(themeStore)
                 .environment(feedbackStore)
                 .environment(statsStore)
+                .environment(remoteConfigStore)
         }
         .onAppear {
             runEntranceAnimations()
@@ -250,5 +255,6 @@ struct HomeView: View {
     .environment(themeStore)
     .environment(feedbackStore)
     .environment(statsStore)
+    .environment(RemoteConfigStore.shared)
     .themeAware(using: themeStore)
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct GameView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.themePalette) private var theme
+    @Environment(RemoteConfigStore.self) private var remoteConfigStore
 
     @State private var viewModel: GameViewModel
     let gameMode: GameMode
@@ -44,7 +45,7 @@ struct GameView: View {
             }
             .padding(.horizontal, 40)
 
-            if viewModel.showsHint {
+            if remoteConfigStore.config.hintsEnabled {
                 hintBar
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
@@ -55,6 +56,7 @@ struct GameView: View {
             NumberPadView(
                 config: viewModel.gridConfig,
                 isPencilMode: Bindable(viewModel).isPencilMode,
+                showPencilNotes: remoteConfigStore.config.pencilNotesEnabled,
                 onNumberTap: { number in
                     viewModel.enterNumber(number)
                 },
@@ -74,6 +76,9 @@ struct GameView: View {
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            if !remoteConfigStore.config.pencilNotesEnabled {
+                viewModel.isPencilMode = false
+            }
             viewModel.onPuzzleUpdated = onPuzzleUpdated
             viewModel.onPuzzleCompleted = onPuzzleCompleted
 
@@ -97,6 +102,11 @@ struct GameView: View {
                     puzzle: viewModel.puzzle,
                     suggestion: hint,
                     onApply: {
+                        AnalyticsService.logHintUsed(
+                            difficulty: viewModel.puzzle.difficulty,
+                            level: viewModel.puzzle.level,
+                            mode: gameMode
+                        )
                         viewModel.confirmHint()
                     },
                     onCancel: {
@@ -200,5 +210,6 @@ struct GameView: View {
             onPuzzleUpdated: { _, _, _ in },
             onPuzzleCompleted: { _, _ in }
         )
+        .environment(RemoteConfigStore.shared)
     }
 }

@@ -1,18 +1,13 @@
 import Foundation
 
 enum AdConfiguration {
-    /// Replace with your AdMob App ID from admob.google.com
-    #if DEBUG
     static let appID = "ca-app-pub-8217658595396953~2752643659"
-    static let interstitialAdUnitID = "ca-app-pub-8217658595396953/5783955503"
-    #else
-    static let appID = "ca-app-pub-8217658595396953~2752643659"
-    static let interstitialAdUnitID = "ca-app-pub-8217658595396953/5783955503"
-    #endif
 
-    /// Minimum time between any two full-screen ads.
-    static let minimumSecondsBetweenAds: TimeInterval = 120
-
-    /// Show a gameplay ad every N game screen entries (start, continue, next level).
-    static let gameplayEntriesBetweenAds = 2
+    static let defaultAdsEnabled = true
+    static let defaultInterstitialAdUnitID = "ca-app-pub-8217658595396953/5783955503"
+    static let defaultMinimumSecondsBetweenAds: TimeInterval = 120
+    static let defaultGameplayEntriesBetweenAds = 2
+    static let defaultAdsOnGameplayEntry = true
+    static let defaultAdsOnHint = true
+    static let defaultAdsOnNextLevel = true
 }

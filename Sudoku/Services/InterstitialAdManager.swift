@@ -36,24 +36,48 @@ final class InterstitialAdManager: NSObject {
         loadAd { _ in }
     }
 
+    func handleRemoteConfigUpdate() {
+        interstitial = nil
+        preload()
+    }
+
     func showAdIfAppropriate(for trigger: AdTrigger, completion: @escaping () -> Void) {
+        let config = RemoteConfigStore.shared.config
+
+        guard config.adsEnabled else {
+            completion()
+            return
+        }
+
         switch trigger {
         case .gameplayEntry:
-            gameplayEntryCount += 1
-            guard shouldShowGameplayAd else {
+            guard config.adsOnGameplayEntry else {
                 completion()
                 return
             }
-        case .hint, .nextLevel:
-            break
+            gameplayEntryCount += 1
+            guard shouldShowGameplayAd(using: config) else {
+                completion()
+                return
+            }
+        case .hint:
+            guard config.adsOnHint else {
+                completion()
+                return
+            }
+        case .nextLevel:
+            guard config.adsOnNextLevel else {
+                completion()
+                return
+            }
         }
 
         attemptPresent(for: trigger, completion: completion)
     }
 
-    private var shouldShowGameplayAd: Bool {
+    private func shouldShowGameplayAd(using config: AppRemoteConfig) -> Bool {
         gameplayEntryCount == 1
-            || gameplayEntryCount % AdConfiguration.gameplayEntriesBetweenAds == 0
+            || gameplayEntryCount % config.gameplayEntriesBetweenAds == 0
     }
 
     private func respectsCooldown(_ trigger: AdTrigger) -> Bool {
@@ -67,7 +91,7 @@ final class InterstitialAdManager: NSObject {
 
     private var canShowAnotherAd: Bool {
         guard let lastShownAt else { return true }
-        return Date().timeIntervalSince(lastShownAt) >= AdConfiguration.minimumSecondsBetweenAds
+        return Date().timeIntervalSince(lastShownAt) >= RemoteConfigStore.shared.config.minimumSecondsBetweenAds
     }
 
     private func loadAd(completion: @escaping (Bool) -> Void) {
@@ -82,7 +106,7 @@ final class InterstitialAdManager: NSObject {
 
         isLoading = true
         InterstitialAd.load(
-            with: AdConfiguration.interstitialAdUnitID,
+            with: RemoteConfigStore.shared.config.interstitialAdUnitID,
             request: Request()
         ) { [weak self] ad, error in
             Task { @MainActor in

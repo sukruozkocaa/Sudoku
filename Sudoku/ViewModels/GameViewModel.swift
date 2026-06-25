@@ -57,10 +57,6 @@ final class GameViewModel {
         StatsStore.formatDuration(elapsedSeconds)
     }
 
-    var showsHint: Bool {
-        puzzle.difficulty.showsHint
-    }
-
     func togglePencilMode() {
         isPencilMode.toggle()
         notifyUpdated()
@@ -129,8 +125,6 @@ final class GameViewModel {
     }
 
     func requestHint() {
-        guard showsHint else { return }
-
         let target = hintTargetCell()
         guard let row = target?.row, let column = target?.column else {
             hintMessage = L10n.allCellsFilled

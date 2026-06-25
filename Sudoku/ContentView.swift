@@ -2,8 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var coordinator: AppCoordinatorViewModel
+    @State private var didLogAppOpen = false
+    private let statsStore: StatsStore
 
     init(statsStore: StatsStore) {
+        self.statsStore = statsStore
         _coordinator = State(initialValue: AppCoordinatorViewModel(statsStore: statsStore))
     }
 
@@ -108,6 +111,14 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            if !didLogAppOpen {
+                didLogAppOpen = true
+                AnalyticsService.logAppOpen(
+                    hasSavedGame: coordinator.hasSavedGame,
+                    puzzlesCompleted: statsStore.stats.puzzlesCompleted
+                )
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                 withAnimation(.easeInOut(duration: 0.5)) {
                     coordinator.finishSplash()
@@ -126,5 +137,6 @@ struct ContentView: View {
         .environment(themeStore)
         .environment(feedbackStore)
         .environment(statsStore)
+        .environment(RemoteConfigStore.shared)
         .themeAware(using: themeStore)
 }

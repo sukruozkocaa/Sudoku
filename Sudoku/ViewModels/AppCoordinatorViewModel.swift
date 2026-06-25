@@ -65,11 +65,13 @@ final class AppCoordinatorViewModel {
         showSplash = false
         if !persistence.hasSeenHowToPlay {
             showHowToPlay = true
+            AnalyticsService.logHowToPlayOpen(source: "first_launch")
         }
     }
 
     func openHowToPlay() {
         showHowToPlay = true
+        AnalyticsService.logHowToPlayOpen(source: "home")
     }
 
     func closeHowToPlay(markSeen: Bool) {
@@ -90,6 +92,7 @@ final class AppCoordinatorViewModel {
         activePuzzle = puzzle
         gameSessionID = UUID()
         saveCurrentProgress(isPencilMode: statsStore.preferences.pencilModeEnabledByDefault)
+        AnalyticsService.logGameStart(difficulty: difficulty, level: puzzle.level, mode: .campaign)
         navigationPath.append(AppDestination.game)
     }
 
@@ -106,6 +109,9 @@ final class AppCoordinatorViewModel {
         }
 
         gameSessionID = UUID()
+        if let puzzle = activePuzzle {
+            AnalyticsService.logGameStart(difficulty: puzzle.difficulty, level: puzzle.level, mode: .daily)
+        }
         navigationPath.append(AppDestination.game)
     }
 
@@ -116,6 +122,10 @@ final class AppCoordinatorViewModel {
         activeGameMode = progress.gameMode
         activePuzzle = progress.puzzle
         gameSessionID = UUID()
+        AnalyticsService.logGameContinue(
+            difficulty: progress.puzzle.difficulty,
+            level: progress.puzzle.level
+        )
         navigationPath.append(AppDestination.game)
     }
 
@@ -132,6 +142,12 @@ final class AppCoordinatorViewModel {
             elapsedSeconds: elapsedSeconds,
             isDaily: activeGameMode == .daily
         )
+        AnalyticsService.logPuzzleComplete(
+            difficulty: puzzle.difficulty,
+            level: puzzle.level,
+            mode: activeGameMode,
+            elapsedSeconds: elapsedSeconds
+        )
         showSuccessOverlay = true
     }
 
@@ -142,6 +158,7 @@ final class AppCoordinatorViewModel {
         let nextPuzzle = SudokuGenerator.generate(difficulty: current.difficulty, level: nextLevel)
         activePuzzle = nextPuzzle
         gameSessionID = UUID()
+        AnalyticsService.logNextLevel(difficulty: current.difficulty, level: nextLevel)
         saveCurrentProgress(isPencilMode: statsStore.preferences.pencilModeEnabledByDefault)
     }
 

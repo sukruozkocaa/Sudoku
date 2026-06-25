@@ -3,6 +3,7 @@ import SwiftUI
 struct NumberPadView: View {
     let config: SudokuGridConfig
     @Binding var isPencilMode: Bool
+    var showPencilNotes: Bool = true
     let onNumberTap: (Int) -> Void
     let onClear: () -> Void
     let onUndo: () -> Void
@@ -22,7 +23,9 @@ struct NumberPadView: View {
             }
 
             HStack(spacing: 10) {
-                pencilButton
+                if showPencilNotes {
+                    pencilButton
+                }
                 actionButton(title: L10n.delete, systemImage: "xmark", action: onClear)
                 actionButton(title: L10n.undo, systemImage: "arrow.uturn.backward", action: onUndo)
             }
