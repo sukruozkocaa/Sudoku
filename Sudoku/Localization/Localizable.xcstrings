@@ -913,13 +913,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finish the puzzle to advance to the next level. Pick Easy, Medium, or Hard — Easy mode includes helpful hints."
+            "value" : "Finish the puzzle to advance to the next level. Pick Easy, Medium, or Hard — helpful hints are available in every mode."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bulmacayı bitirince sonraki seviyeye geçersin. Kolay, Orta veya Zor seç — Kolay modda ipucu da var."
+            "value" : "Bulmacayı bitirince sonraki seviyeye geçersin. Kolay, Orta veya Zor seç — her modda ipucu kullanabilirsin."
           }
         }
       }

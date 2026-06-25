@@ -41,7 +41,7 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
     }
 
     var showsHint: Bool {
-        self == .easy
+        true
     }
 
     func baseClueCount(for level: Int) -> Int {
