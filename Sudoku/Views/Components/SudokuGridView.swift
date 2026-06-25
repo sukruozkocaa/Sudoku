@@ -38,6 +38,8 @@ struct SudokuGridView: View {
                                         } label: {
                                             SudokuCellView(
                                                 value: viewModel.cellDisplayValue(row: row, column: column),
+                                                notes: viewModel.cellNotes(row: row, column: column),
+                                                maxNumber: config.maxNumber,
                                                 isFixed: viewModel.isFixedCell(row: row, column: column),
                                                 isSelected: viewModel.isSelected(row: row, column: column),
                                                 isConflict: viewModel.isConflict(row: row, column: column),

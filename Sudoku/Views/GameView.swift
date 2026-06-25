@@ -5,15 +5,26 @@ struct GameView: View {
     @Environment(\.themePalette) private var theme
 
     @State private var viewModel: GameViewModel
-    let onPuzzleUpdated: (SudokuPuzzle) -> Void
-    let onPuzzleCompleted: (SudokuPuzzle) -> Void
+    let gameMode: GameMode
+    let onPuzzleUpdated: (SudokuPuzzle, Int, Bool) -> Void
+    let onPuzzleCompleted: (SudokuPuzzle, Int) -> Void
 
     init(
         puzzle: SudokuPuzzle,
-        onPuzzleUpdated: @escaping (SudokuPuzzle) -> Void,
-        onPuzzleCompleted: @escaping (SudokuPuzzle) -> Void
+        elapsedSeconds: Int = 0,
+        isPencilMode: Bool = true,
+        gameMode: GameMode = .campaign,
+        onPuzzleUpdated: @escaping (SudokuPuzzle, Int, Bool) -> Void,
+        onPuzzleCompleted: @escaping (SudokuPuzzle, Int) -> Void
     ) {
-        _viewModel = State(initialValue: GameViewModel(puzzle: puzzle))
+        _viewModel = State(
+            initialValue: GameViewModel(
+                puzzle: puzzle,
+                elapsedSeconds: elapsedSeconds,
+                isPencilMode: isPencilMode
+            )
+        )
+        self.gameMode = gameMode
         self.onPuzzleUpdated = onPuzzleUpdated
         self.onPuzzleCompleted = onPuzzleCompleted
     }
@@ -22,7 +33,11 @@ struct GameView: View {
         VStack(spacing: 0) {
             header
 
-            Spacer(minLength: 20)
+            timerBar
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+
+            Spacer(minLength: 16)
 
             SudokuGridView(viewModel: viewModel) { row, column in
                 viewModel.selectCell(row: row, column: column)
@@ -39,6 +54,7 @@ struct GameView: View {
 
             NumberPadView(
                 config: viewModel.gridConfig,
+                isPencilMode: Bindable(viewModel).isPencilMode,
                 onNumberTap: { number in
                     viewModel.enterNumber(number)
                 },
@@ -62,8 +78,18 @@ struct GameView: View {
             viewModel.onPuzzleCompleted = onPuzzleCompleted
 
             DispatchQueue.main.async {
-                InterstitialAdManager.shared.showAdIfAppropriate(for: .gameplayEntry) { }
+                InterstitialAdManager.shared.showAdIfAppropriate(for: .gameplayEntry) {
+                    viewModel.startTimerIfNeeded()
+                }
             }
+        }
+        .onChange(of: viewModel.isPencilMode) { _, _ in
+            viewModel.onPuzzleUpdated?(viewModel.puzzle, viewModel.elapsedSeconds, viewModel.isPencilMode)
+        }
+        .onDisappear {
+            persistProgress()
+            guard !InterstitialAdManager.shared.isPresentingAd else { return }
+            viewModel.stopTimer()
         }
         .overlay {
             if let hint = viewModel.activeHint {
@@ -84,9 +110,14 @@ struct GameView: View {
         .animation(.easeInOut(duration: 0.25), value: viewModel.activeHint != nil)
     }
 
+    private func persistProgress() {
+        onPuzzleUpdated(viewModel.puzzle, viewModel.elapsedSeconds, viewModel.isPencilMode)
+    }
+
     private var header: some View {
         HStack {
             Button {
+                persistProgress()
                 dismiss()
             } label: {
                 Image(systemName: "chevron.left")
@@ -99,11 +130,11 @@ struct GameView: View {
             Spacer()
 
             VStack(spacing: 4) {
-                Text(viewModel.levelText)
+                Text(gameMode == .daily ? L10n.dailyChallengeTitle : viewModel.levelText)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundStyle(theme.textPrimary)
 
-                Text(viewModel.difficultyText)
+                Text(gameMode == .daily ? L10n.dailyChallengeSubtitle : viewModel.difficultyText)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(theme.textSecondary)
             }
@@ -116,6 +147,20 @@ struct GameView: View {
         .padding(.horizontal, 24)
         .padding(.top, 4)
         .padding(.bottom, 4)
+    }
+
+    private var timerBar: some View {
+        Text(viewModel.formattedElapsedTime)
+            .font(.system(size: 18, weight: .semibold, design: .monospaced))
+            .foregroundStyle(theme.accent)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 8)
+            .background(theme.cardBackground, in: Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(theme.cardBorder, lineWidth: 1)
+            )
+            .frame(maxWidth: .infinity)
     }
 
     private var hintBar: some View {
@@ -152,8 +197,8 @@ struct GameView: View {
     NavigationStack {
         GameView(
             puzzle: SudokuGenerator.generate(difficulty: .easy, level: 1),
-            onPuzzleUpdated: { _ in },
-            onPuzzleCompleted: { _ in }
+            onPuzzleUpdated: { _, _, _ in },
+            onPuzzleCompleted: { _, _ in }
         )
     }
 }

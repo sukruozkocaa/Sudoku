@@ -140,6 +140,8 @@ private struct HintGridPreview: View {
 
                                         SudokuCellView(
                                             value: puzzle.userGrid[row][column],
+                                            notes: puzzle.notes(at: row, column: column),
+                                            maxNumber: config.maxNumber,
                                             isFixed: puzzle.initialGrid[row][column] != nil,
                                             isSelected: isTarget,
                                             isConflict: false,

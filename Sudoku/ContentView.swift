@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var coordinator = AppCoordinatorViewModel()
+    @State private var coordinator: AppCoordinatorViewModel
+
+    init(statsStore: StatsStore) {
+        _coordinator = State(initialValue: AppCoordinatorViewModel(statsStore: statsStore))
+    }
 
     var body: some View {
         @Bindable var coordinator = coordinator
@@ -20,6 +24,9 @@ struct ContentView: View {
                     },
                     onShowHowToPlay: {
                         coordinator.openHowToPlay()
+                    },
+                    onDailyChallenge: {
+                        coordinator.startDailyChallenge()
                     }
                 )
                 .navigationDestination(for: AppDestination.self) { destination in
@@ -28,11 +35,14 @@ struct ContentView: View {
                         if let puzzle = coordinator.activePuzzle {
                             GameView(
                                 puzzle: puzzle,
-                                onPuzzleUpdated: { updated in
-                                    coordinator.updatePuzzle(updated)
+                                elapsedSeconds: coordinator.activeElapsedSeconds,
+                                isPencilMode: coordinator.activeIsPencilMode,
+                                gameMode: coordinator.activeGameMode,
+                                onPuzzleUpdated: { updated, elapsed, pencilMode in
+                                    coordinator.updatePuzzle(updated, elapsedSeconds: elapsed, isPencilMode: pencilMode)
                                 },
-                                onPuzzleCompleted: { completed in
-                                    coordinator.handlePuzzleCompleted(completed)
+                                onPuzzleCompleted: { completed, elapsed in
+                                    coordinator.handlePuzzleCompleted(completed, elapsedSeconds: elapsed)
                                 }
                             )
                             .id(coordinator.gameSessionID)
@@ -44,6 +54,9 @@ struct ContentView: View {
             if coordinator.showSuccessOverlay, let puzzle = coordinator.activePuzzle {
                 SuccessOverlay(
                     level: puzzle.level,
+                    completionTime: coordinator.lastCompletionSeconds,
+                    isDaily: coordinator.activeGameMode == .daily,
+                    showsNextLevel: coordinator.activeGameMode == .campaign,
                     onNextLevel: {
                         coordinator.showSuccessOverlay = false
                         DispatchQueue.main.async {
@@ -107,9 +120,11 @@ struct ContentView: View {
 #Preview {
     let themeStore = ThemeStore()
     let feedbackStore = FeedbackStore()
+    let statsStore = StatsStore()
 
-    ContentView()
+    ContentView(statsStore: statsStore)
         .environment(themeStore)
         .environment(feedbackStore)
+        .environment(statsStore)
         .themeAware(using: themeStore)
 }

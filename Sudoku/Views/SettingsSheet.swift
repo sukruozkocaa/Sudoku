@@ -5,6 +5,7 @@ struct SettingsSheet: View {
     @Environment(\.openURL) private var openURL
     @Environment(ThemeStore.self) private var themeStore
     @Environment(FeedbackStore.self) private var feedbackStore
+    @Environment(StatsStore.self) private var statsStore
     @Environment(\.themePalette) private var theme
 
     var body: some View {
@@ -59,6 +60,55 @@ struct SettingsSheet: View {
                     )
                 }
                 .padding(.horizontal, 20)
+                .padding(.bottom, 24)
+
+                Text(L10n.settingsGameplayNote)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+
+                VStack(spacing: 12) {
+                    feedbackToggle(
+                        icon: "pencil.and.outline",
+                        title: L10n.settingsPencilDefault,
+                        subtitle: L10n.settingsPencilDefaultSubtitle,
+                        isOn: Bindable(statsStore).pencilModeEnabledByDefault
+                    )
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 24)
+
+                Text(L10n.settingsStatsNote)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+
+                VStack(spacing: 12) {
+                    statRow(icon: "checkmark.circle.fill", title: L10n.statPuzzlesCompleted, value: "\(statsStore.stats.puzzlesCompleted)")
+                    statRow(icon: "flame.fill", title: L10n.statBestStreak, value: "\(max(statsStore.stats.bestStreak, statsStore.stats.currentStreak))")
+                    statRow(icon: "clock.fill", title: L10n.statPlayTime, value: StatsStore.formatDurationLong(statsStore.stats.totalPlayTimeSeconds))
+                    statRow(icon: "calendar.circle.fill", title: L10n.statDailyCompleted, value: "\(statsStore.stats.dailyCompletedCount)")
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 24)
+
+                Text(L10n.settingsAchievements)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
+
+                VStack(spacing: 12) {
+                    ForEach(AchievementID.allCases) { achievement in
+                        achievementRow(achievement)
+                    }
+                }
+                .padding(.horizontal, 20)
                 .padding(.bottom, 20)
 
                 rateAppButton
@@ -72,7 +122,7 @@ struct SettingsSheet: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         .presentationDragIndicator(.hidden)
         .presentationCornerRadius(28)
         .presentationBackground {
@@ -167,6 +217,66 @@ struct SettingsSheet: View {
         )
     }
 
+    private func statRow(icon: String, title: String, value: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(theme.accent)
+                .frame(width: 44, height: 44)
+                .background(theme.accent.opacity(0.15), in: Circle())
+
+            Text(title)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(theme.textPrimary)
+
+            Spacer()
+
+            Text(value)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(theme.accent)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(theme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(theme.cardBorder, lineWidth: 1)
+                )
+        )
+    }
+
+    private func achievementRow(_ achievement: AchievementID) -> some View {
+        let unlocked = statsStore.isAchievementUnlocked(achievement)
+
+        return HStack(spacing: 16) {
+            Image(systemName: achievement.icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(unlocked ? theme.accent : theme.textSecondary.opacity(0.45))
+                .frame(width: 44, height: 44)
+                .background((unlocked ? theme.accent : theme.textSecondary).opacity(0.12), in: Circle())
+
+            Text(achievement.title)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(unlocked ? theme.textPrimary : theme.textSecondary)
+
+            Spacer()
+
+            Image(systemName: unlocked ? "checkmark.seal.fill" : "lock.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(unlocked ? theme.success : theme.textSecondary.opacity(0.5))
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(theme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(unlocked ? theme.success.opacity(0.35) : theme.cardBorder, lineWidth: 1)
+                )
+        )
+    }
+
     private var rateAppButton: some View {
         Button {
             openURL(AppInfo.appStoreReviewURL)
@@ -235,14 +345,17 @@ struct SettingsSheet: View {
 #Preview {
     let themeStore = ThemeStore()
     let feedbackStore = FeedbackStore()
+    let statsStore = StatsStore()
 
     Text("Preview")
         .sheet(isPresented: .constant(true)) {
             SettingsSheet()
                 .environment(themeStore)
                 .environment(feedbackStore)
+                .environment(statsStore)
         }
         .environment(themeStore)
         .environment(feedbackStore)
+        .environment(statsStore)
         .themeAware(using: themeStore)
 }

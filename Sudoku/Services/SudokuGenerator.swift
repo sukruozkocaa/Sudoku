@@ -1,11 +1,11 @@
 import Foundation
 
 enum SudokuGenerator {
-    static func generate(difficulty: Difficulty, level: Int) -> SudokuPuzzle {
+    static func generate(difficulty: Difficulty, level: Int, seed: UInt64? = nil) -> SudokuPuzzle {
         let config = difficulty.gridConfig
-        let solution = generateSolution(config: config)
+        let solution = generateSolution(config: config, seed: seed)
         let clueCount = difficulty.baseClueCount(for: level)
-        let initialGrid = createPuzzle(from: solution, config: config, clueCount: clueCount)
+        let initialGrid = createPuzzle(from: solution, config: config, clueCount: clueCount, seed: seed)
         return SudokuPuzzle(
             solution: solution,
             initialGrid: initialGrid,
@@ -14,21 +14,22 @@ enum SudokuGenerator {
         )
     }
 
-    private static func generateSolution(config: SudokuGridConfig) -> [[Int]] {
+    private static func generateSolution(config: SudokuGridConfig, seed: UInt64?) -> [[Int]] {
         var grid = Array(repeating: Array(repeating: 0, count: config.size), count: config.size)
-        _ = solve(grid: &grid, config: config)
+        _ = solve(grid: &grid, config: config, seed: seed)
         return grid
     }
 
-    private static func solve(grid: inout [[Int]], config: SudokuGridConfig) -> Bool {
+    private static func solve(grid: inout [[Int]], config: SudokuGridConfig, seed: UInt64?) -> Bool {
         for row in 0..<config.size {
             for column in 0..<config.size {
                 guard grid[row][column] == 0 else { continue }
 
-                for number in (1...config.maxNumber).shuffled() {
+                let numbers = shuffledNumbers(maxNumber: config.maxNumber, seed: seed, row: row, column: column)
+                for number in numbers {
                     if isValidPlacement(grid: grid, row: row, column: column, number: number, config: config) {
                         grid[row][column] = number
-                        if solve(grid: &grid, config: config) { return true }
+                        if solve(grid: &grid, config: config, seed: seed) { return true }
                         grid[row][column] = 0
                     }
                 }
@@ -41,12 +42,15 @@ enum SudokuGenerator {
     private static func createPuzzle(
         from solution: [[Int]],
         config: SudokuGridConfig,
-        clueCount: Int
+        clueCount: Int,
+        seed: UInt64?
     ) -> [[Int?]] {
         var puzzle = solution.map { row in row.map { Optional($0) } }
         var positions = (0..<config.cellCount).map { index in
             (index / config.size, index % config.size)
-        }.shuffled()
+        }
+        positions = shuffled(positions, seed: seed, salt: 991)
+
         var removed = config.cellCount - clueCount
 
         while removed > 0, let position = positions.popLast() {
@@ -59,14 +63,15 @@ enum SudokuGenerator {
             }
         }
 
-        ensureEditableCellsInEveryBox(puzzle: &puzzle, solution: solution, config: config)
+        ensureEditableCellsInEveryBox(puzzle: &puzzle, solution: solution, config: config, seed: seed)
         return puzzle
     }
 
     private static func ensureEditableCellsInEveryBox(
         puzzle: inout [[Int?]],
         solution: [[Int]],
-        config: SudokuGridConfig
+        config: SudokuGridConfig,
+        seed: UInt64?
     ) {
         for boxIndex in 0..<config.boxCount {
             guard isBoxFullyFilled(puzzle: puzzle, boxIndex: boxIndex, config: config) else { continue }
@@ -80,7 +85,9 @@ enum SudokuGenerator {
                 }
             }
 
-            for position in candidates.shuffled() {
+            candidates = shuffled(candidates, seed: seed, salt: boxIndex + 17)
+
+            for position in candidates {
                 let backup = puzzle[position.0][position.1]
                 puzzle[position.0][position.1] = nil
 
@@ -167,5 +174,18 @@ enum SudokuGenerator {
             }
         }
         return true
+    }
+
+    private static func shuffledNumbers(maxNumber: Int, seed: UInt64?, row: Int, column: Int) -> [Int] {
+        let numbers = Array(1...maxNumber)
+        guard let seed else { return numbers.shuffled() }
+        var generator = SeededRandomNumberGenerator(seed: seed &+ UInt64(row * 97 + column * 13))
+        return numbers.shuffled(using: &generator)
+    }
+
+    private static func shuffled<T>(_ values: [T], seed: UInt64?, salt: Int) -> [T] {
+        guard let seed else { return values.shuffled() }
+        var generator = SeededRandomNumberGenerator(seed: seed &+ UInt64(salt))
+        return values.shuffled(using: &generator)
     }
 }

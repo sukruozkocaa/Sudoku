@@ -11,15 +11,34 @@ final class GameViewModel {
     var pendingCompletionFlashes: [CompletedRegion] = []
     var activeHint: HintSuggestion?
     var hintMessage: String?
+    var isPencilMode: Bool
+    private(set) var elapsedSeconds: Int
 
-    var onPuzzleUpdated: ((SudokuPuzzle) -> Void)?
-    var onPuzzleCompleted: ((SudokuPuzzle) -> Void)?
+    var onPuzzleUpdated: ((SudokuPuzzle, Int, Bool) -> Void)?
+    var onPuzzleCompleted: ((SudokuPuzzle, Int) -> Void)?
 
     private var moveHistory: [(row: Int, column: Int, previous: Int?)] = []
+    private var timerTask: Task<Void, Never>?
 
-    init(puzzle: SudokuPuzzle) {
+    init(
+        puzzle: SudokuPuzzle,
+        elapsedSeconds: Int = 0,
+        isPencilMode: Bool = true
+    ) {
         self.puzzle = puzzle
+        self.elapsedSeconds = elapsedSeconds
+        self.isPencilMode = isPencilMode
         self.puzzle.refreshCompletedRegions()
+    }
+
+    func startTimerIfNeeded() {
+        guard timerTask == nil else { return }
+        startTimer()
+    }
+
+    func stopTimer() {
+        timerTask?.cancel()
+        timerTask = nil
     }
 
     var gridConfig: SudokuGridConfig {
@@ -34,8 +53,17 @@ final class GameViewModel {
         puzzle.difficulty.title
     }
 
+    var formattedElapsedTime: String {
+        StatsStore.formatDuration(elapsedSeconds)
+    }
+
     var showsHint: Bool {
         puzzle.difficulty.showsHint
+    }
+
+    func togglePencilMode() {
+        isPencilMode.toggle()
+        notifyUpdated()
     }
 
     func selectCell(row: Int, column: Int) {
@@ -52,8 +80,16 @@ final class GameViewModel {
         guard let row = selectedRow, let column = selectedColumn else { return }
         guard isCellEditable(row: row, column: column) else { return }
 
+        if isPencilMode {
+            puzzle.toggleNote(at: row, column: column, number: number)
+            GameFeedbackService.shared.play(.cellSelect)
+            notifyUpdated()
+            return
+        }
+
         moveHistory.append((row, column, puzzle.userGrid[row][column]))
         puzzle.userGrid[row][column] = number
+        puzzle.clearNotes(at: row, column: column)
         applyMoveEffects(row: row, column: column)
     }
 
@@ -62,12 +98,19 @@ final class GameViewModel {
         guard puzzle.initialGrid[row][column] == nil else { return }
         guard isCellEditable(row: row, column: column) else { return }
 
+        if isPencilMode {
+            puzzle.clearNotes(at: row, column: column)
+            GameFeedbackService.shared.play(.numberClear)
+            notifyUpdated()
+            return
+        }
+
         moveHistory.append((row, column, puzzle.userGrid[row][column]))
         puzzle.userGrid[row][column] = nil
         conflictingCells = []
         hintMessage = nil
         GameFeedbackService.shared.play(.numberClear)
-        onPuzzleUpdated?(puzzle)
+        notifyUpdated()
     }
 
     func undoLastMove() {
@@ -82,7 +125,7 @@ final class GameViewModel {
         puzzle.refreshCompletedRegions()
         purgeLockedMoveHistory()
         GameFeedbackService.shared.play(.undo)
-        onPuzzleUpdated?(puzzle)
+        notifyUpdated()
     }
 
     func requestHint() {
@@ -118,6 +161,7 @@ final class GameViewModel {
         selectedRow = row
         selectedColumn = column
         puzzle.userGrid[row][column] = correctValue
+        puzzle.clearNotes(at: row, column: column)
         activeHint = nil
         applyMoveEffects(row: row, column: column)
     }
@@ -152,6 +196,10 @@ final class GameViewModel {
 
     func cellDisplayValue(row: Int, column: Int) -> Int? {
         puzzle.userGrid[row][column]
+    }
+
+    func cellNotes(row: Int, column: Int) -> [Int] {
+        puzzle.notes(at: row, column: column)
     }
 
     func isFixedCell(row: Int, column: Int) -> Bool {
@@ -202,10 +250,11 @@ final class GameViewModel {
             GameFeedbackService.shared.play(.numberPlace)
         }
 
-        onPuzzleUpdated?(puzzle)
+        notifyUpdated()
 
         if puzzle.isComplete {
-            onPuzzleCompleted?(puzzle)
+            stopTimer()
+            onPuzzleCompleted?(puzzle, elapsedSeconds)
         }
     }
 
@@ -223,5 +272,21 @@ final class GameViewModel {
             }
         }
         return nil
+    }
+
+    private func notifyUpdated() {
+        onPuzzleUpdated?(puzzle, elapsedSeconds, isPencilMode)
+    }
+
+    private func startTimer() {
+        timerTask?.cancel()
+        timerTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                elapsedSeconds += 1
+                notifyUpdated()
+            }
+        }
     }
 }

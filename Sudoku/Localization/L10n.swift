@@ -82,6 +82,36 @@ enum L10n {
     static var settingsHapticsSubtitle: String { String(localized: "settings_haptics_subtitle") }
     static var settingsSounds: String { String(localized: "settings_sounds") }
     static var settingsSoundsSubtitle: String { String(localized: "settings_sounds_subtitle") }
+    static var notes: String { String(localized: "notes") }
+    static var dailyChallengeTitle: String { String(localized: "daily_challenge_title") }
+    static var dailyChallengeSubtitle: String { String(localized: "daily_challenge_subtitle") }
+    static var dailyChallengeDone: String { String(localized: "daily_challenge_done") }
+    static var dailyChallengeContinue: String { String(localized: "daily_challenge_continue") }
+    static var dailyChallengeCompleted: String { String(localized: "daily_challenge_completed") }
+    static var settingsStatsNote: String { String(localized: "settings_stats_note") }
+    static var settingsGameplayNote: String { String(localized: "settings_gameplay_note") }
+    static var settingsPencilDefault: String { String(localized: "settings_pencil_default") }
+    static var settingsPencilDefaultSubtitle: String { String(localized: "settings_pencil_default_subtitle") }
+    static var settingsAchievements: String { String(localized: "settings_achievements") }
+    static var statPuzzlesCompleted: String { String(localized: "stat_puzzles_completed") }
+    static var statBestStreak: String { String(localized: "stat_best_streak") }
+    static var statPlayTime: String { String(localized: "stat_play_time") }
+    static var statDailyCompleted: String { String(localized: "stat_daily_completed") }
+    static var achievementFirstWin: String { String(localized: "achievement_first_win") }
+    static var achievementTenWins: String { String(localized: "achievement_ten_wins") }
+    static var achievementStreak7: String { String(localized: "achievement_streak_7") }
+    static var achievementDaily7: String { String(localized: "achievement_daily_7") }
+    static var achievementHardWin: String { String(localized: "achievement_hard_win") }
+    static var achievementSpeedster: String { String(localized: "achievement_speedster") }
+
+    static func streakDays(_ days: Int) -> String {
+        String(format: String(localized: "streak_days_format"), days)
+    }
+
+    static func completionTime(_ time: String) -> String {
+        String(format: String(localized: "completion_time_format"), time)
+    }
+
     static var appearanceSystem: String { String(localized: "appearance_system") }
     static var appearanceLight: String { String(localized: "appearance_light") }
     static var appearanceDark: String { String(localized: "appearance_dark") }

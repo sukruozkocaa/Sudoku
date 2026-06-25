@@ -7,10 +7,12 @@ struct HomeView: View {
     let onStart: () -> Void
     let onContinue: () -> Void
     let onShowHowToPlay: () -> Void
+    let onDailyChallenge: () -> Void
 
     @Environment(\.themePalette) private var theme
     @Environment(ThemeStore.self) private var themeStore
     @Environment(FeedbackStore.self) private var feedbackStore
+    @Environment(StatsStore.self) private var statsStore
     @State private var showSettings = false
     @State private var heroAppeared = false
     @State private var titleAppeared = false
@@ -21,7 +23,7 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                Spacer()
+                Spacer(minLength: 24)
 
                 VStack(spacing: 28) {
                     SudokuLogoView(size: 118, showRing: true, animateCells: false, animateRing: true, animateGlow: false)
@@ -44,41 +46,49 @@ struct HomeView: View {
                     .opacity(titleAppeared ? 1 : 0)
                 }
 
-                Spacer()
+                Spacer(minLength: 32)
 
-                VStack(spacing: 14) {
-                    if hasSavedGame {
-                        Button(action: onContinue) {
-                            VStack(spacing: 4) {
-                                Text(L10n.continueGame)
-                                if let savedLevel, let savedDifficulty {
-                                    Text(L10n.savedProgress(level: savedLevel, difficulty: savedDifficulty.title))
-                                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                                        .opacity(0.85)
+                VStack(spacing: 16) {
+                    if statsStore.stats.currentStreak > 0 {
+                        streakBadge
+                            .opacity(buttonsAppeared ? 1 : 0)
+                    }
+
+                    dailyChallengeCard
+                        .padding(.horizontal, 28)
+                        .opacity(buttonsAppeared ? 1 : 0)
+
+                    VStack(spacing: 14) {
+                        if hasSavedGame {
+                            Button(action: onContinue) {
+                                VStack(spacing: 4) {
+                                    Text(L10n.continueGame)
+                                    if let savedLevel, let savedDifficulty {
+                                        Text(L10n.savedProgress(level: savedLevel, difficulty: savedDifficulty.title))
+                                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                                            .opacity(0.85)
+                                    }
                                 }
                             }
+                            .buttonStyle(PremiumButtonStyle())
                         }
-                        .buttonStyle(PremiumButtonStyle())
-                        .opacity(buttonsAppeared ? 1 : 0)
-                        .offset(y: buttonsAppeared ? 0 : 24)
-                    }
 
-                    Button(action: onStart) {
-                        Text(hasSavedGame ? L10n.newGame : L10n.start)
-                    }
-                    .buttonStyle(PremiumButtonStyle(isSecondary: hasSavedGame))
-                    .overlay {
-                        if !hasSavedGame {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(theme.accent.opacity(buttonGlow ? 0.45 : 0.15), lineWidth: 1.5)
-                                .scaleEffect(buttonGlow ? 1.04 : 1)
-                                .blur(radius: 1)
+                        Button(action: onStart) {
+                            Text(hasSavedGame ? L10n.newGame : L10n.start)
+                        }
+                        .buttonStyle(PremiumButtonStyle(isSecondary: hasSavedGame))
+                        .overlay {
+                            if !hasSavedGame {
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .stroke(theme.accent.opacity(buttonGlow ? 0.45 : 0.15), lineWidth: 1.5)
+                                    .scaleEffect(buttonGlow ? 1.04 : 1)
+                                    .blur(radius: 1)
+                            }
                         }
                     }
+                    .padding(.horizontal, 28)
                     .opacity(buttonsAppeared ? 1 : 0)
-                    .offset(y: buttonsAppeared ? 0 : 28)
                 }
-                .padding(.horizontal, 28)
                 .padding(.bottom, 48)
             }
 
@@ -106,10 +116,79 @@ struct HomeView: View {
             SettingsSheet()
                 .environment(themeStore)
                 .environment(feedbackStore)
+                .environment(statsStore)
         }
         .onAppear {
             runEntranceAnimations()
         }
+    }
+
+    private var streakBadge: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "flame.fill")
+                .foregroundStyle(.orange)
+            Text(L10n.streakDays(statsStore.stats.currentStreak))
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(theme.textPrimary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(theme.cardBackground, in: Capsule())
+        .overlay(
+            Capsule()
+                .stroke(theme.cardBorder, lineWidth: 1)
+        )
+    }
+
+    private var dailyChallengeCard: some View {
+        Button(action: onDailyChallenge) {
+            HStack(spacing: 16) {
+                Image(systemName: statsStore.isDailyCompletedToday ? "checkmark.seal.fill" : "calendar")
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(statsStore.isDailyCompletedToday ? theme.success : theme.accent)
+                    .frame(width: 52, height: 52)
+                    .background(theme.accent.opacity(0.12), in: Circle())
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.dailyChallengeTitle)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(theme.textPrimary)
+
+                    Text(dailySubtitle)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(theme.textSecondary)
+                }
+
+                Spacer()
+
+                if !statsStore.isDailyCompletedToday {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(theme.textSecondary)
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(theme.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(theme.cardBorder, lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(statsStore.isDailyCompletedToday)
+    }
+
+    private var dailySubtitle: String {
+        if statsStore.isDailyCompletedToday {
+            return L10n.dailyChallengeDone
+        }
+        if statsStore.hasDailyInProgress {
+            return L10n.dailyChallengeContinue
+        }
+        return L10n.dailyChallengeSubtitle
     }
 
     private func iconButton(systemName: String, accessibility: String, action: @escaping () -> Void) -> some View {
@@ -157,6 +236,7 @@ struct HomeView: View {
 #Preview {
     let themeStore = ThemeStore()
     let feedbackStore = FeedbackStore()
+    let statsStore = StatsStore()
 
     HomeView(
         hasSavedGame: true,
@@ -164,9 +244,11 @@ struct HomeView: View {
         savedDifficulty: .medium,
         onStart: {},
         onContinue: {},
-        onShowHowToPlay: {}
+        onShowHowToPlay: {},
+        onDailyChallenge: {}
     )
     .environment(themeStore)
     .environment(feedbackStore)
+    .environment(statsStore)
     .themeAware(using: themeStore)
 }

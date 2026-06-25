@@ -3,10 +3,14 @@ import SwiftUI
 
 struct SuccessOverlay: View {
     let level: Int
+    let completionTime: Int
+    let isDaily: Bool
+    let showsNextLevel: Bool
     let onNextLevel: () -> Void
     let onHome: () -> Void
 
     @Environment(\.requestReview) private var requestReview
+    @Environment(StatsStore.self) private var statsStore
     @Environment(\.themePalette) private var theme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: Double = 0
@@ -33,21 +37,36 @@ struct SuccessOverlay: View {
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundStyle(theme.textPrimary)
 
-                    Text(L10n.levelCompleted(level))
+                    Text(subtitleText)
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(theme.textSecondary)
+                        .multilineTextAlignment(.center)
+
+                    if completionTime > 0 {
+                        Text(L10n.completionTime(StatsStore.formatDuration(completionTime)))
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundStyle(theme.accent)
+                    }
+
+                    if statsStore.stats.currentStreak > 1 {
+                        Text(L10n.streakDays(statsStore.stats.currentStreak))
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundStyle(theme.textSecondary)
+                    }
                 }
 
                 VStack(spacing: 12) {
-                    Button(action: onNextLevel) {
-                        Text(L10n.nextLevel)
+                    if showsNextLevel {
+                        Button(action: onNextLevel) {
+                            Text(L10n.nextLevel)
+                        }
+                        .buttonStyle(PremiumButtonStyle())
                     }
-                    .buttonStyle(PremiumButtonStyle())
 
                     Button(action: onHome) {
                         Text(L10n.home)
                     }
-                    .buttonStyle(PremiumButtonStyle(isSecondary: true))
+                    .buttonStyle(PremiumButtonStyle(isSecondary: showsNextLevel))
                 }
             }
             .padding(28)
@@ -76,9 +95,26 @@ struct SuccessOverlay: View {
             }
         }
     }
+
+    private var subtitleText: String {
+        if isDaily {
+            return L10n.dailyChallengeCompleted
+        }
+        return L10n.levelCompleted(level)
+    }
 }
 
 #Preview {
-    SuccessOverlay(level: 3, onNextLevel: {}, onHome: {})
-        .premiumBackground()
+    let statsStore = StatsStore()
+
+    SuccessOverlay(
+        level: 3,
+        completionTime: 245,
+        isDaily: false,
+        showsNextLevel: true,
+        onNextLevel: {},
+        onHome: {}
+    )
+    .environment(statsStore)
+    .premiumBackground()
 }

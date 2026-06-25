@@ -15,6 +15,7 @@ struct SudokuPuzzle: Equatable, Codable {
     var completedBoxes: Set<Int>
     var completedRows: Set<Int>
     var completedColumns: Set<Int>
+    var notes: [[[Int]]]
 
     var gridConfig: SudokuGridConfig {
         difficulty.gridConfig
@@ -28,7 +29,8 @@ struct SudokuPuzzle: Equatable, Codable {
         userGrid: [[Int?]]? = nil,
         completedBoxes: Set<Int> = [],
         completedRows: Set<Int> = [],
-        completedColumns: Set<Int> = []
+        completedColumns: Set<Int> = [],
+        notes: [[[Int]]]? = nil
     ) {
         self.solution = solution
         self.initialGrid = initialGrid
@@ -38,6 +40,23 @@ struct SudokuPuzzle: Equatable, Codable {
         self.completedBoxes = completedBoxes
         self.completedRows = completedRows
         self.completedColumns = completedColumns
+        self.notes = Self.normalizedNotes(notes, size: difficulty.gridConfig.size)
+    }
+
+    static func emptyNotes(size: Int) -> [[[Int]]] {
+        Array(repeating: Array(repeating: [], count: size), count: size)
+    }
+
+    static func normalizedNotes(_ notes: [[[Int]]]?, size: Int) -> [[[Int]]] {
+        guard let notes, notes.count == size else {
+            return emptyNotes(size: size)
+        }
+        return notes.map { row in
+            guard row.count == size else { return Array(repeating: [Int](), count: size) }
+            return row.map { noteList in
+                noteList.filter { $0 >= 1 }.sorted()
+            }
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -49,6 +68,7 @@ struct SudokuPuzzle: Equatable, Codable {
         case completedBoxes
         case completedRows
         case completedColumns
+        case notes
     }
 
     init(from decoder: Decoder) throws {
@@ -61,6 +81,10 @@ struct SudokuPuzzle: Equatable, Codable {
         completedBoxes = try container.decode(Set<Int>.self, forKey: .completedBoxes)
         completedRows = try container.decodeIfPresent(Set<Int>.self, forKey: .completedRows) ?? []
         completedColumns = try container.decodeIfPresent(Set<Int>.self, forKey: .completedColumns) ?? []
+        notes = Self.normalizedNotes(
+            try container.decodeIfPresent([[[Int]]].self, forKey: .notes),
+            size: difficulty.gridConfig.size
+        )
         refreshCompletedRegions()
     }
 
@@ -74,6 +98,27 @@ struct SudokuPuzzle: Equatable, Codable {
         try container.encode(completedBoxes, forKey: .completedBoxes)
         try container.encode(completedRows, forKey: .completedRows)
         try container.encode(completedColumns, forKey: .completedColumns)
+        try container.encode(notes, forKey: .notes)
+    }
+
+    mutating func clearNotes(at row: Int, column: Int) {
+        guard notes.indices.contains(row), notes[row].indices.contains(column) else { return }
+        notes[row][column] = []
+    }
+
+    mutating func toggleNote(at row: Int, column: Int, number: Int) {
+        guard notes.indices.contains(row), notes[row].indices.contains(column) else { return }
+        if notes[row][column].contains(number) {
+            notes[row][column].removeAll { $0 == number }
+        } else {
+            notes[row][column].append(number)
+            notes[row][column].sort()
+        }
+    }
+
+    func notes(at row: Int, column: Int) -> [Int] {
+        guard notes.indices.contains(row), notes[row].indices.contains(column) else { return [] }
+        return notes[row][column]
     }
 
     var isComplete: Bool {

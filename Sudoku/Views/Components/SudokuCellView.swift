@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SudokuCellView: View {
     let value: Int?
+    let notes: [Int]
+    let maxNumber: Int
     let isFixed: Bool
     let isSelected: Bool
     let isConflict: Bool
@@ -23,6 +25,8 @@ struct SudokuCellView: View {
                 Text("\(value)")
                     .font(.system(size: fontSize, weight: isFixed ? .bold : .semibold, design: .rounded))
                     .foregroundStyle(numberColor)
+            } else if !notes.isEmpty {
+                notesGrid
             }
         }
         .overlay(alignment: .trailing) {
@@ -55,6 +59,30 @@ struct SudokuCellView: View {
         }
     }
 
+    private var notesGrid: some View {
+        let columns = maxNumber <= 6 ? 3 : 3
+        let rows = Int(ceil(Double(maxNumber) / Double(columns)))
+
+        return VStack(spacing: 0) {
+            ForEach(0..<rows, id: \.self) { row in
+                HStack(spacing: 0) {
+                    ForEach(0..<columns, id: \.self) { column in
+                        let number = row * columns + column + 1
+                        Text(notes.contains(number) ? "\(number)" : " ")
+                            .font(.system(size: noteFontSize, weight: .semibold, design: .rounded))
+                            .foregroundStyle(theme.textSecondary)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+            }
+        }
+        .padding(2)
+    }
+
+    private var noteFontSize: CGFloat {
+        maxNumber <= 6 ? fontSize * 0.28 : fontSize * 0.24
+    }
+
     private var backgroundColor: Color {
         if isSelected {
             return theme.accent.opacity(0.18)
@@ -78,9 +106,11 @@ struct SudokuCellView: View {
 
     HStack {
         SudokuCellView(
-            value: 5,
-            isFixed: true,
-            isSelected: false,
+            value: nil,
+            notes: [1, 3, 6],
+            maxNumber: 6,
+            isFixed: false,
+            isSelected: true,
             isConflict: false,
             isPassive: false,
             showRightBorder: true,
@@ -90,8 +120,10 @@ struct SudokuCellView: View {
         )
         SudokuCellView(
             value: 7,
+            notes: [],
+            maxNumber: 6,
             isFixed: false,
-            isSelected: true,
+            isSelected: false,
             isConflict: false,
             isPassive: false,
             showRightBorder: false,

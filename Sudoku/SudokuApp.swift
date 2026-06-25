@@ -4,6 +4,7 @@ import SwiftUI
 struct SudokuApp: App {
     @State private var themeStore = ThemeStore()
     @State private var feedbackStore = FeedbackStore()
+    @State private var statsStore = StatsStore()
 
     init() {
         InterstitialAdManager.shared.configure()
@@ -11,9 +12,10 @@ struct SudokuApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(statsStore: statsStore)
                 .environment(themeStore)
                 .environment(feedbackStore)
+                .environment(statsStore)
                 .themeAware(using: themeStore)
                 .onAppear {
                     GameFeedbackService.shared.prepare()

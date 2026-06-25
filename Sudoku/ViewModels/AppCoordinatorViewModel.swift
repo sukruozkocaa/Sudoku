@@ -16,28 +16,49 @@ final class AppCoordinatorViewModel {
     var showDifficultySheet = false
     var showSuccessOverlay = false
     var showHowToPlay = false
+    var activeGameMode: GameMode = .campaign
+    var lastCompletionSeconds = 0
 
     private let persistence: PersistenceServiceProtocol
+    private let statsStore: StatsStore
     private(set) var savedProgress: GameProgress?
 
-    init(persistence: PersistenceServiceProtocol = PersistenceService()) {
+    init(
+        persistence: PersistenceServiceProtocol = PersistenceService(),
+        statsStore: StatsStore
+    ) {
         self.persistence = persistence
+        self.statsStore = statsStore
         self.savedProgress = persistence.loadProgress()
         normalizeSavedProgressIfNeeded()
     }
 
     var resumeLevel: Int? {
-        guard let progress = savedProgress, progress.hasActiveGame else { return nil }
+        guard let progress = savedProgress, progress.hasActiveGame, progress.gameMode == .campaign else { return nil }
         return progress.puzzle.level
     }
 
     var resumeDifficulty: Difficulty? {
-        guard let progress = savedProgress, progress.hasActiveGame else { return nil }
+        guard let progress = savedProgress, progress.hasActiveGame, progress.gameMode == .campaign else { return nil }
         return progress.puzzle.difficulty
     }
 
     var hasSavedGame: Bool {
-        savedProgress?.hasActiveGame == true
+        savedProgress?.hasActiveGame == true && savedProgress?.gameMode == .campaign
+    }
+
+    var activeElapsedSeconds: Int {
+        if activeGameMode == .daily {
+            return persistence.loadDailyProgress()?.elapsedSeconds ?? 0
+        }
+        return persistence.loadProgress()?.elapsedSeconds ?? savedProgress?.elapsedSeconds ?? 0
+    }
+
+    var activeIsPencilMode: Bool {
+        if activeGameMode == .daily {
+            return persistence.loadDailyProgress()?.isPencilMode ?? statsStore.preferences.pencilModeEnabledByDefault
+        }
+        return savedProgress?.isPencilMode ?? statsStore.preferences.pencilModeEnabledByDefault
     }
 
     func finishSplash() {
@@ -64,45 +85,71 @@ final class AppCoordinatorViewModel {
 
     func startGame(difficulty: Difficulty) {
         showDifficultySheet = false
+        activeGameMode = .campaign
         let puzzle = SudokuGenerator.generate(difficulty: difficulty, level: 1)
         activePuzzle = puzzle
         gameSessionID = UUID()
-        saveCurrentProgress()
+        saveCurrentProgress(isPencilMode: statsStore.preferences.pencilModeEnabledByDefault)
+        navigationPath.append(AppDestination.game)
+    }
+
+    func startDailyChallenge() {
+        guard !statsStore.isDailyCompletedToday else { return }
+
+        activeGameMode = .daily
+
+        if let progress = persistence.loadDailyProgress(), progress.hasActiveGame {
+            activePuzzle = progress.puzzle
+        } else {
+            activePuzzle = DailyChallengeService.generate()
+            saveCurrentProgress(isPencilMode: statsStore.preferences.pencilModeEnabledByDefault)
+        }
+
+        gameSessionID = UUID()
         navigationPath.append(AppDestination.game)
     }
 
     func continueGame() {
         normalizeSavedProgressIfNeeded()
+        savedProgress = persistence.loadProgress()
         guard let progress = savedProgress, progress.hasActiveGame else { return }
+        activeGameMode = progress.gameMode
         activePuzzle = progress.puzzle
         gameSessionID = UUID()
         navigationPath.append(AppDestination.game)
     }
 
-    func updatePuzzle(_ puzzle: SudokuPuzzle) {
+    func updatePuzzle(_ puzzle: SudokuPuzzle, elapsedSeconds: Int, isPencilMode: Bool) {
         activePuzzle = puzzle
-        saveCurrentProgress()
+        saveCurrentProgress(elapsedSeconds: elapsedSeconds, isPencilMode: isPencilMode)
     }
 
-    func handlePuzzleCompleted(_ puzzle: SudokuPuzzle) {
+    func handlePuzzleCompleted(_ puzzle: SudokuPuzzle, elapsedSeconds: Int) {
         activePuzzle = puzzle
+        lastCompletionSeconds = elapsedSeconds
+        statsStore.recordCompletion(
+            puzzle: puzzle,
+            elapsedSeconds: elapsedSeconds,
+            isDaily: activeGameMode == .daily
+        )
         showSuccessOverlay = true
     }
 
     func advanceToNextLevel() {
-        guard let current = activePuzzle else { return }
+        guard activeGameMode == .campaign, let current = activePuzzle else { return }
         showSuccessOverlay = false
         let nextLevel = current.level + 1
         let nextPuzzle = SudokuGenerator.generate(difficulty: current.difficulty, level: nextLevel)
         activePuzzle = nextPuzzle
         gameSessionID = UUID()
-        saveCurrentProgress()
+        saveCurrentProgress(isPencilMode: statsStore.preferences.pencilModeEnabledByDefault)
     }
 
     func returnHome() {
         navigationPath = NavigationPath()
         activePuzzle = nil
         showSuccessOverlay = false
+        activeGameMode = .campaign
         savedProgress = persistence.loadProgress()
         normalizeSavedProgressIfNeeded()
     }
@@ -110,6 +157,7 @@ final class AppCoordinatorViewModel {
     func handlePopToHome() {
         activePuzzle = nil
         showSuccessOverlay = false
+        activeGameMode = .campaign
         savedProgress = persistence.loadProgress()
         normalizeSavedProgressIfNeeded()
     }
@@ -119,22 +167,45 @@ final class AppCoordinatorViewModel {
         savedProgress = nil
     }
 
-    private func saveCurrentProgress() {
+    private func saveCurrentProgress(
+        elapsedSeconds: Int = 0,
+        isPencilMode: Bool? = nil
+    ) {
         guard let puzzle = activePuzzle else { return }
-        let progress = GameProgress(puzzle: puzzle, hasActiveGame: true)
-        persistence.saveProgress(progress)
-        savedProgress = progress
+
+        let pencilMode = isPencilMode ?? statsStore.preferences.pencilModeEnabledByDefault
+        let progress = GameProgress(
+            puzzle: puzzle,
+            hasActiveGame: true,
+            elapsedSeconds: elapsedSeconds,
+            gameMode: activeGameMode,
+            isPencilMode: pencilMode
+        )
+
+        if activeGameMode == .daily {
+            persistence.saveDailyProgress(progress)
+        } else {
+            persistence.saveProgress(progress)
+            savedProgress = progress
+        }
     }
 
     private func normalizeSavedProgressIfNeeded() {
         guard var progress = savedProgress, progress.hasActiveGame else { return }
         guard progress.puzzle.isComplete else { return }
+        guard progress.gameMode == .campaign else { return }
 
         let nextPuzzle = SudokuGenerator.generate(
             difficulty: progress.puzzle.difficulty,
             level: progress.puzzle.level + 1
         )
-        progress = GameProgress(puzzle: nextPuzzle, hasActiveGame: true)
+        progress = GameProgress(
+            puzzle: nextPuzzle,
+            hasActiveGame: true,
+            elapsedSeconds: 0,
+            gameMode: .campaign,
+            isPencilMode: progress.isPencilMode
+        )
         persistence.saveProgress(progress)
         savedProgress = progress
     }

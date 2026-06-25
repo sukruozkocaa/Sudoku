@@ -18,6 +18,7 @@ final class InterstitialAdManager: NSObject {
     private var pendingCompletion: (() -> Void)?
     private var pendingLoadCompletions: [(Bool) -> Void] = []
     private var activeTrigger: AdTrigger?
+    private(set) var isPresentingAd = false
 
     private override init() {
         super.init()
@@ -156,10 +157,12 @@ final class InterstitialAdManager: NSObject {
         activeTrigger = trigger
         pendingCompletion = completion
         self.interstitial = nil
+        isPresentingAd = true
         interstitial.present(from: presenter)
     }
 
     private func finishPresentation() {
+        isPresentingAd = false
         let completion = pendingCompletion
         pendingCompletion = nil
         activeTrigger = nil
