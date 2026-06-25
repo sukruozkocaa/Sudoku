@@ -5,6 +5,7 @@ struct SudokuLogoView: View {
     var showRing: Bool = true
     var animateCells: Bool = false
     var animateRing: Bool = true
+    var animateGlow: Bool = true
 
     @Environment(\.themePalette) private var theme
 
@@ -96,8 +97,10 @@ struct SudokuLogoView: View {
                 }
             }
 
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
-                glowPulse = 1.15
+            if animateGlow {
+                withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                    glowPulse = 1.15
+                }
             }
 
             if animateCells {

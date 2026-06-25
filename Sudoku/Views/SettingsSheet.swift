@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(ThemeStore.self) private var themeStore
     @Environment(\.themePalette) private var theme
 
@@ -31,6 +32,10 @@ struct SettingsSheet: View {
                 }
             }
             .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+
+            rateAppButton
+                .padding(.horizontal, 20)
 
             Spacer(minLength: 16)
 
@@ -40,7 +45,7 @@ struct SettingsSheet: View {
                 .padding(.bottom, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
         .presentationCornerRadius(28)
         .presentationBackground {
@@ -89,6 +94,46 @@ struct SettingsSheet: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .stroke(isSelected ? theme.accent.opacity(0.5) : theme.cardBorder, lineWidth: isSelected ? 1.5 : 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var rateAppButton: some View {
+        Button {
+            openURL(AppInfo.appStoreReviewURL)
+        } label: {
+            HStack(spacing: 16) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(theme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(theme.accent.opacity(0.15), in: Circle())
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.settingsRateApp)
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundStyle(theme.textPrimary)
+
+                    Text(L10n.settingsRateAppSubtitle)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(theme.textSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(theme.textSecondary)
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(theme.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(theme.cardBorder, lineWidth: 1)
                     )
             )
         }

@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 
 struct SuccessOverlay: View {
@@ -5,6 +6,7 @@ struct SuccessOverlay: View {
     let onNextLevel: () -> Void
     let onHome: () -> Void
 
+    @Environment(\.requestReview) private var requestReview
     @Environment(\.themePalette) private var theme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: Double = 0
@@ -65,6 +67,12 @@ struct SuccessOverlay: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 scale = 1
                 opacity = 1
+            }
+
+            if AppReviewManager.registerLevelCompletion() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    requestReview()
+                }
             }
         }
     }

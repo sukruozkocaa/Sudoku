@@ -3,11 +3,11 @@ import Foundation
 enum AdConfiguration {
     /// Replace with your AdMob App ID from admob.google.com
     #if DEBUG
-    static let appID = "ca-app-pub-3940256099942544~1458002511"
-    static let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910"
+    static let appID = "ca-app-pub-8217658595396953~2752643659"
+    static let interstitialAdUnitID = "ca-app-pub-8217658595396953/5783955503"
     #else
-    static let appID = "ca-app-pub-3940256099942544~1458002511"
-    static let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910"
+    static let appID = "ca-app-pub-8217658595396953~2752643659"
+    static let interstitialAdUnitID = "ca-app-pub-8217658595396953/5783955503"
     #endif
 
     /// Minimum time between any two full-screen ads.

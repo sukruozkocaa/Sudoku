@@ -773,6 +773,38 @@
         }
       }
     },
+    "settings_rate_app" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate on the App Store"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store'da Puan Ver"
+          }
+        }
+      }
+    },
+    "settings_rate_app_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enjoying Sudoku? Leave us a review."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sudoku'yu beğendin mi? Bize puan ver."
+          }
+        }
+      }
+    },
     "settings_title" : {
       "localizations" : {
         "en" : {

@@ -15,7 +15,6 @@ struct HomeView: View {
     @State private var titleAppeared = false
     @State private var taglineAppeared = false
     @State private var buttonsAppeared = false
-    @State private var floatOffset: CGFloat = 0
     @State private var buttonGlow = false
 
     var body: some View {
@@ -24,8 +23,7 @@ struct HomeView: View {
                 Spacer()
 
                 VStack(spacing: 28) {
-                    SudokuLogoView(size: 118, showRing: true, animateCells: true, animateRing: true)
-                        .offset(y: floatOffset)
+                    SudokuLogoView(size: 118, showRing: true, animateCells: false, animateRing: true, animateGlow: false)
                         .opacity(heroAppeared ? 1 : 0)
                         .scaleEffect(heroAppeared ? 1 : 0.82)
 
@@ -41,10 +39,8 @@ struct HomeView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                             .opacity(taglineAppeared ? 1 : 0)
-                            .offset(y: taglineAppeared ? 0 : 14)
                     }
                     .opacity(titleAppeared ? 1 : 0)
-                    .offset(y: titleAppeared ? 0 : 22)
                 }
 
                 Spacer()
@@ -134,23 +130,19 @@ struct HomeView: View {
     }
 
     private func runEntranceAnimations() {
-        withAnimation(.spring(response: 0.8, dampingFraction: 0.74).delay(0.05)) {
+        withAnimation(.easeOut(duration: 0.55).delay(0.05)) {
             heroAppeared = true
         }
 
-        withAnimation(.easeInOut(duration: 2.8).repeatForever(autoreverses: true).delay(0.7)) {
-            floatOffset = -7
-        }
-
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.28)) {
+        withAnimation(.easeOut(duration: 0.45).delay(0.2)) {
             titleAppeared = true
         }
 
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.82).delay(0.42)) {
+        withAnimation(.easeOut(duration: 0.45).delay(0.32)) {
             taglineAppeared = true
         }
 
-        withAnimation(.spring(response: 0.75, dampingFraction: 0.78).delay(0.58)) {
+        withAnimation(.easeOut(duration: 0.5).delay(0.44)) {
             buttonsAppeared = true
         }
 
