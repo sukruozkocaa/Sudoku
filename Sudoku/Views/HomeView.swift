@@ -10,6 +10,7 @@ struct HomeView: View {
 
     @Environment(\.themePalette) private var theme
     @Environment(ThemeStore.self) private var themeStore
+    @Environment(FeedbackStore.self) private var feedbackStore
     @State private var showSettings = false
     @State private var heroAppeared = false
     @State private var titleAppeared = false
@@ -104,6 +105,7 @@ struct HomeView: View {
         .sheet(isPresented: $showSettings) {
             SettingsSheet()
                 .environment(themeStore)
+                .environment(feedbackStore)
         }
         .onAppear {
             runEntranceAnimations()
@@ -154,6 +156,7 @@ struct HomeView: View {
 
 #Preview {
     let themeStore = ThemeStore()
+    let feedbackStore = FeedbackStore()
 
     HomeView(
         hasSavedGame: true,
@@ -164,5 +167,6 @@ struct HomeView: View {
         onShowHowToPlay: {}
     )
     .environment(themeStore)
+    .environment(feedbackStore)
     .themeAware(using: themeStore)
 }

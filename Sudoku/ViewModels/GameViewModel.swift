@@ -45,6 +45,7 @@ final class GameViewModel {
         selectedColumn = column
         conflictingCells = []
         hintMessage = nil
+        GameFeedbackService.shared.play(.cellSelect)
     }
 
     func enterNumber(_ number: Int) {
@@ -65,6 +66,7 @@ final class GameViewModel {
         puzzle.userGrid[row][column] = nil
         conflictingCells = []
         hintMessage = nil
+        GameFeedbackService.shared.play(.numberClear)
         onPuzzleUpdated?(puzzle)
     }
 
@@ -79,6 +81,7 @@ final class GameViewModel {
         hintMessage = nil
         puzzle.refreshCompletedRegions()
         purgeLockedMoveHistory()
+        GameFeedbackService.shared.play(.undo)
         onPuzzleUpdated?(puzzle)
     }
 
@@ -188,6 +191,16 @@ final class GameViewModel {
         flashes += puzzle.completedRows.subtracting(previousRows).sorted().map { .row($0) }
         flashes += puzzle.completedColumns.subtracting(previousColumns).sorted().map { .column($0) }
         pendingCompletionFlashes = flashes
+
+        if puzzle.isComplete {
+            GameFeedbackService.shared.play(.puzzleComplete)
+        } else if !conflictingCells.isEmpty {
+            GameFeedbackService.shared.play(.conflict)
+        } else if !flashes.isEmpty {
+            GameFeedbackService.shared.play(.regionComplete)
+        } else {
+            GameFeedbackService.shared.play(.numberPlace)
+        }
 
         onPuzzleUpdated?(puzzle)
 

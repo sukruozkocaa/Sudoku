@@ -4,45 +4,72 @@ struct SettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(ThemeStore.self) private var themeStore
+    @Environment(FeedbackStore.self) private var feedbackStore
     @Environment(\.themePalette) private var theme
 
     var body: some View {
-        VStack(spacing: 0) {
-            Capsule()
-                .fill(theme.textSecondary.opacity(0.35))
-                .frame(width: 44, height: 5)
-                .padding(.top, 10)
+        ScrollView {
+            VStack(spacing: 0) {
+                Capsule()
+                    .fill(theme.textSecondary.opacity(0.35))
+                    .frame(width: 44, height: 5)
+                    .padding(.top, 10)
+                    .padding(.bottom, 24)
+
+                Text(L10n.settingsTitle)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(theme.textPrimary)
+                    .padding(.bottom, 8)
+
+                Text(L10n.settingsAppearanceNote)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+
+                VStack(spacing: 12) {
+                    ForEach(AppAppearance.allCases) { appearance in
+                        appearanceButton(for: appearance)
+                    }
+                }
+                .padding(.horizontal, 20)
                 .padding(.bottom, 24)
 
-            Text(L10n.settingsTitle)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundStyle(theme.textPrimary)
-                .padding(.bottom, 8)
+                Text(L10n.settingsFeedbackNote)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 16)
 
-            Text(L10n.settingsAppearanceNote)
-                .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundStyle(theme.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 28)
+                VStack(spacing: 12) {
+                    feedbackToggle(
+                        icon: "iphone.radiowaves.left.and.right",
+                        title: L10n.settingsHaptics,
+                        subtitle: L10n.settingsHapticsSubtitle,
+                        isOn: Bindable(feedbackStore).hapticsEnabled
+                    )
 
-            VStack(spacing: 12) {
-                ForEach(AppAppearance.allCases) { appearance in
-                    appearanceButton(for: appearance)
+                    feedbackToggle(
+                        icon: "speaker.wave.2.fill",
+                        title: L10n.settingsSounds,
+                        subtitle: L10n.settingsSoundsSubtitle,
+                        isOn: Bindable(feedbackStore).soundsEnabled
+                    )
                 }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-
-            rateAppButton
                 .padding(.horizontal, 20)
+                .padding(.bottom, 20)
 
-            Spacer(minLength: 16)
+                rateAppButton
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
 
-            Text(AppInfo.versionLabel)
-                .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundStyle(theme.textSecondary.opacity(0.7))
-                .padding(.bottom, 12)
+                Text(AppInfo.versionLabel)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary.opacity(0.7))
+                    .padding(.bottom, 12)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .presentationDetents([.medium, .large])
@@ -98,6 +125,46 @@ struct SettingsSheet: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private func feedbackToggle(
+        icon: String,
+        title: String,
+        subtitle: String,
+        isOn: Binding<Bool>
+    ) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(theme.accent)
+                .frame(width: 44, height: 44)
+                .background(theme.accent.opacity(0.15), in: Circle())
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(theme.textPrimary)
+
+                Text(subtitle)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(theme.textSecondary)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(theme.accent)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(theme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(theme.cardBorder, lineWidth: 1)
+                )
+        )
     }
 
     private var rateAppButton: some View {
@@ -167,12 +234,15 @@ struct SettingsSheet: View {
 
 #Preview {
     let themeStore = ThemeStore()
+    let feedbackStore = FeedbackStore()
 
     Text("Preview")
         .sheet(isPresented: .constant(true)) {
             SettingsSheet()
                 .environment(themeStore)
+                .environment(feedbackStore)
         }
         .environment(themeStore)
+        .environment(feedbackStore)
         .themeAware(using: themeStore)
 }

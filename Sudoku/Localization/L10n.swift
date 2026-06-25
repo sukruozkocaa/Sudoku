@@ -77,6 +77,11 @@ enum L10n {
     static var settingsAppearanceNote: String { String(localized: "settings_appearance_note") }
     static var settingsRateApp: String { String(localized: "settings_rate_app") }
     static var settingsRateAppSubtitle: String { String(localized: "settings_rate_app_subtitle") }
+    static var settingsFeedbackNote: String { String(localized: "settings_feedback_note") }
+    static var settingsHaptics: String { String(localized: "settings_haptics") }
+    static var settingsHapticsSubtitle: String { String(localized: "settings_haptics_subtitle") }
+    static var settingsSounds: String { String(localized: "settings_sounds") }
+    static var settingsSoundsSubtitle: String { String(localized: "settings_sounds_subtitle") }
     static var appearanceSystem: String { String(localized: "appearance_system") }
     static var appearanceLight: String { String(localized: "appearance_light") }
     static var appearanceDark: String { String(localized: "appearance_dark") }
